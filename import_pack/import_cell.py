@@ -16,7 +16,7 @@ class ImportCell(object):
         :param import_field: 导入字段设置
         '''
         self.import_row = import_row
-        self.cell = cell
+        self.cell = import_row.import_sheet.merge_cell_value_map.get((import_row.row_num, index), cell)  # 判断是否属于合并单元格
         self.index = index
         self.import_field = import_field
 

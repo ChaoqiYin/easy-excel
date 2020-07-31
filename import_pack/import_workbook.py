@@ -10,11 +10,11 @@ from ..base_work_book import BaseWorkBook
 
 def turn_file_to_excel(file_path=None, file_contents=None):
     if file_contents is not None:
-        workbook = xlrd.open_workbook(file_contents=file_contents)
+        workbook = xlrd.open_workbook(file_contents=file_contents, formatting_info=True)
     else:
         with open(file_path, encoding='utf8') as f:
             content = f.read()
-            workbook = xlrd.open_workbook(file_contents=content)
+            workbook = xlrd.open_workbook(file_contents=content, formatting_info=True)
     return workbook
 
 
@@ -25,6 +25,7 @@ class ImportWorkbook(BaseWorkBook):
         self.sheet_no = 0  # sheet位置，从0开始，默认0
         self.parse_map = None  # 解析map对照
         self.start_row_num = 0  # 从第几行开始解析，默认0开始
+        self.end_row_num = None  # 从第几行停止，默认None
 
     def add_converter(self, converter_key, func):
         '''
@@ -47,15 +48,17 @@ class ImportWorkbook(BaseWorkBook):
         self.file_content = file_content
         return self
 
-    def sheet_info(self, sheet_no=0, start_row_num=0):
+    def sheet_info(self, sheet_no=0, start_row_num=0, end_row_num=None):
         '''
         sheet解析目标
         :param sheet_no: sheet索引 0开始
         :param start_row_num: 开始行数 0开始
+        :param end_row_num: 结束行数 0开始
         :return:
         '''
         self.sheet_no = sheet_no
         self.start_row_num = start_row_num
+        self.end_row_num = end_row_num
         return self
 
     def set_parse_map(self, **parse_map):

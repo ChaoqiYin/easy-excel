@@ -28,6 +28,7 @@ class ImportSheet(BaseSheet):
         self.error_message_prefix = error_message_prefix or '第{row_num}行'
         self.reader_data_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
         self.error_message_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
+        self.merge_cell_value_map = {}  # 存储合并单元格数据的map
 
     def get_parse_map(self):
         return self.excel_workbook.parse_map
@@ -79,7 +80,7 @@ class ImportSheet(BaseSheet):
         同步方式进行解析
         :return:
         '''
-        for row_num in range(self.start_row_num, self.total_row_num):
+        for row_num in range(self.start_row_num, self.excel_workbook.end_row_num or self.total_row_num):
             self.parse_row(row_num)
 
     def thread_parse(self):
@@ -93,17 +94,28 @@ class ImportSheet(BaseSheet):
         work_list = []
         # 创建线程池
         with ThreadPoolExecutor(max_workers=self.excel_workbook.max_workers) as executor:
-            for row_num in range(self.start_row_num, self.total_row_num):
+            for row_num in range(self.start_row_num, self.excel_workbook.end_row_num or self.total_row_num):
                 future = executor.submit(work_func, self, row_num)
                 work_list.append(future)
             # 等待完成
             wait(work_list)
+
+    def del_merged_cells(self):
+        '''
+        处理合并单元格
+        '''
+        for (start_row, end_row, start_col, end_col) in self.__sheet.merged_cells:
+            for row in range(start_row, end_row):  # 起始行和结束行为前闭后开关系，从0开始算
+                for col in range(start_col, end_col):  # 起始列和结束列为前闭后开关系，也是从0开始算
+                    if row != start_row or col != start_col:
+                        self.merge_cell_value_map[(row, col)] = self.__sheet.cell(start_row, start_col)
 
     def parse_import(self):
         '''
         开始解析的函数，相当于解析的入口
         :return:
         '''
+        self.del_merged_cells()
         self.set_title_map()
         if self.excel_workbook.sync is True:
             self.sync_parse()
