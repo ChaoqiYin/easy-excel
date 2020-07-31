@@ -44,7 +44,21 @@ class ExportSheet(BaseSheet):
         异步模式进行解析
         :return:
         '''
-        pass
+        def work_func(that, rn, data):
+            that.add_row(rn, data)
+
+        work_list = []
+        # 创建线程池
+        with ThreadPoolExecutor(max_workers=self.excel_workbook.max_workers) as executor:
+            row_num = 0
+            # 后期可能会添加自定义抬头
+            self.add_title(row_num)
+            for row_data in self.list_data:
+                row_num += 1
+                future = executor.submit(work_func, self, row_num, row_data)
+                work_list.append(future)
+            # 等待完成
+            wait(work_list)
 
     def set_row_height(self, row_num):
         '''
