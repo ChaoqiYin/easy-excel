@@ -2,6 +2,8 @@
 excel操作简化，包含导入和导出功能
 #### 依赖xlrd、xlwt, futures库
 
+## 可使用pip install easy-excel-util
+
 ```python
 from flask import Flask, request
 from excel_util import Builder, ImportField, TEXT
