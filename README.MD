@@ -10,7 +10,7 @@
 + 通用配置  
     首先需要实例化一个Builder类来进行下一步导入或导出操作，可以设置为一个全局实例，该实例能进行一些导入或导出需要使用的统一配置
     ```python
-    from excel_util import Builder
+    from easy_excel_util import Builder
     
     build = Builder()
     ```
