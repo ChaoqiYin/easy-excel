@@ -18,7 +18,7 @@ class Builder(object):
         '''
         设置导入转换类
         :param converter_key: 转换类型key
-        :param func: 转换方法
+        :param func: 转换方法，接收一个value参数，值为单元格数据
         :return:
         '''
         if converter_key not in range(0, 7):
@@ -35,7 +35,7 @@ class Builder(object):
         '''
         设置导出转换类
         :param data_type_class: 转换类型的类名: type(x)
-        :param func: 转换方法
+        :param func: 转换方法，接收一个value参数，值为待转换数据
         :return:
         '''
         # 检查是否已经设置过这个key的转换方法，提醒
