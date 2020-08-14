@@ -5,21 +5,16 @@ from .import_pack.import_workbook import ImportWorkbook
 from .export_pack.export_workbook import ExportWorkBook
 from .utils import get_converters_key
 
+# 导入/导出时的数据全局转换方法，key对应ctype_text中的类型
+_converters = {}
+
 
 class Builder(object):
     '''
     构造类，主要用于设置导入/导出时的数据转换方法，下面的key对应ctype_text中的类型
     '''
-
-    def __init__(self):
-        '''
-        初始化
-        '''
-        # 转换方法对应
-        self.converters = {}
-        return
-
-    def add_import_converter(self, converter_key, func):
+    @classmethod
+    def add_import_converter(cls, converter_key, func):
         '''
         设置导入转换类
         :param converter_key: 转换类型key
@@ -28,20 +23,30 @@ class Builder(object):
         '''
         if converter_key not in range(0, 7):
             raise Exception("converter_key must in the [0, 1, 2, 3, 4, 5, 6] keys")
-        self.converters[get_converters_key(converter_key, True)] = func
-        return self
+        # 检查是否已经设置过这个key的转换方法，提醒
+        key = get_converters_key(converter_key, True)
+        if _converters.get(key, None) is not None:
+            raise Exception("already set import_converter with key: %s" % key)
+        _converters[key] = func
+        return cls
 
-    def add_export_converter(self, data_type_class, func):
+    @classmethod
+    def add_export_converter(cls, data_type_class, func):
         '''
         设置导出转换类
         :param data_type_class: 转换类型的类名: type(x)
         :param func: 转换方法
         :return:
         '''
-        self.converters[get_converters_key(data_type_class, False)] = func
-        return self
+        # 检查是否已经设置过这个key的转换方法，提醒
+        key = get_converters_key(data_type_class, False)
+        if _converters.get(key, None) is not None:
+            raise Exception("already set export_converter with data_type_class: %s" % key)
+        _converters[key] = func
+        return cls
 
-    def build_import(self, file, parse_map, sheet_no=0, start_row_num=0, end_row_num=None):
+    @staticmethod
+    def build_import(file, parse_map, sheet_no=0, start_row_num=0, end_row_num=None):
         '''
         生成导入实例
         :param file: 文件路径或者可read()的文件
@@ -51,7 +56,8 @@ class Builder(object):
         :param end_row_num: 到第几行结束
         :return:
         '''
-        return ImportWorkbook(file, parse_map, self.converters.copy(), sheet_no, start_row_num, end_row_num)
+        return ImportWorkbook(file, parse_map, _converters.copy(), sheet_no, start_row_num, end_row_num)
 
-    def build_export(self, file_path_or_stream):
-        return ExportWorkBook(file_path_or_stream, self.converters.copy())
+    @staticmethod
+    def build_export(file_path_or_stream):
+        return ExportWorkBook(file_path_or_stream, _converters.copy())
