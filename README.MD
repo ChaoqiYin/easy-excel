@@ -19,7 +19,7 @@
         ```python
         from easy_excel_util import EMPTY, TEXT, NUMBER, DATE, BOOLEAN, ERROR, BLANK
         
-        builder.add_import_converter(TEXT, func=lambda value: str(value))  # func接收一个value参数，该值为excel单元格内的数据
+        builder.add_import_converter(NUMBER, func=lambda value: str(value))  # func接收一个value参数，该值为excel单元格内的数据
         ```  
     * add_export_converter(data_type_class, func)：添加一个全局的导出时数据转换方法，data_type_class是需要待转换的python数据类型，根据data_type_class的不同会对对应的python数据进行转换 
         ```python
