@@ -47,12 +47,22 @@ DEFAULT_TITLE_STYLE.font = font  # 设定样式
 DEFAULT_TITLE_STYLE.borders = borders
 
 
-# 转换类的key获取方法
 def get_converters_key(prefix, is_import):
+    '''
+    转换类的key获取方法
+    :param prefix: 类型
+    :param is_import: 是否是导入转换方法
+    :return:
+    '''
     return str(prefix) + '_' + 'i' if is_import is True else 'r'
 
 
 def xlrd_del_datetime(xldate_value):
+    '''
+    cell时间内容转换为datetime
+    :param xldate_value: cell单元格数据，时间类型
+    :return:
+    '''
     return xldate_as_datetime(xldate_value, 0)
 
 
@@ -73,7 +83,7 @@ def sort_dict_data(dict_data, reverse=False):
 
 def sort_dict_list_data(dict_list_data, reverse=False):
     '''
-    对字典-list格式数据进行key的排序处理，并将list整合为一个list
+    对字典-list格式数据进行key的排序处理，并将list整合为一个list，例: {1: ['第1行xx有错', '第1行yy有错'], 2: ['第2行xx有错', '第2行yy有错']}
     :param dict_list_data: 字典数据
     :param reverse: 是否降序
     :return: map的values的列表
