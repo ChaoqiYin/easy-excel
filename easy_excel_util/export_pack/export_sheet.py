@@ -3,10 +3,8 @@
 # Author: ChaoqiYin
 from concurrent.futures import ThreadPoolExecutor, wait
 
-from ..base_sheet import BaseSheet
 
-
-class ExportSheet(BaseSheet):
+class ExportSheet(object):
 
     def __init__(self, excel_workbook, wb, row_del_class, row_validate_func, sheet_no, sheet_info):
         '''
@@ -18,7 +16,10 @@ class ExportSheet(BaseSheet):
         :param sheet_no: 表格索引
         :param sheet_info: sheet_name, parse_map, data 待导出的信息
         '''
-        super().__init__(excel_workbook, row_del_class, row_validate_func, sheet_no)
+        self.excel_workbook = excel_workbook
+        self.row_del_class = row_del_class
+        self.row_validate_func = row_validate_func  # 自定义的行处理方法，未自定义时为None
+        self.sheet_no = sheet_no
         self.sheet_info = sheet_info
         self.wb = wb
         self.sheet_name = sheet_info.sheet_name

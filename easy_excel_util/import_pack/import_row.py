@@ -17,26 +17,21 @@ class ImportRow(object):
         self.row = row
         self.row_num = row_num
 
-    def get_total_col_num(self):
+    @property
+    def total_col_num(self):
         '''
         取得sheet总列数
         :return:
         '''
         return self.import_sheet.total_col_num
 
-    def get_parse_map(self):
+    @property
+    def parse_map(self):
         '''
         获取解析字段的map映射
         :return:
         '''
-        return self.import_sheet.get_parse_map()
-
-    def get_value(self):
-        '''
-        获取解析后的对象
-        :return:
-        '''
-        return self.deserialize_row()
+        return self.import_sheet.parse_map
 
     def matching_index_value(self, build_field):
         '''
@@ -46,24 +41,24 @@ class ImportRow(object):
         '''
         index = build_field.index
         # 索引值在总列数内的情况
-        if (index + 1) <= self.get_total_col_num():
+        if (index + 1) <= self.total_col_num:
             value = ImportCell(self, self.row[index], index, build_field).get_value()
         else:
             value = None
         return value
 
-    def deserialize_row(self):
+    def get_value(self):
         '''
-        反序列化行数据
+        获取解析后的对象, 反序列化行数据
         :return:
         '''
         error_message_list = []
         deserialize_success = True
-        if self.get_parse_map() is None:
+        if self.parse_map is None:
             raise Exception("must call the function 'set_parse_map' before read excel!")
         # 遍历找寻对应的字段信息组装为ReaderData对象
         reader_data = ReaderData(self.row_num)
-        for field_name, build_field in self.get_parse_map().items():
+        for field_name, build_field in self.parse_map.items():
             result_map = self.matching_index_value(build_field)
             setattr(reader_data, field_name, result_map.get('result'))
             # 根据校验是否成功添加错误信息

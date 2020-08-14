@@ -4,14 +4,16 @@
 import xlwt
 
 from .export_row import ExportRow
-from ..base_work_book import BaseWorkBook
 from .export_sheet import ExportSheet
 from .sheet_map import SheetMap
 
 
-class ExportWorkBook(BaseWorkBook):
+class ExportWorkBook(object):
     def __init__(self, file_path_or_stream, converters):
-        super().__init__(file_path_or_stream, converters)
+        self.file_path = file_path_or_stream  # 文件路径
+        self.converters = converters  # 转换类
+        self.sync = True  # 是否为同步模式
+        self.max_workers = 3  # 异步最大线程数
         self.style = None  # 单元格样式
         self.sheet_map = None  # 表索引: [表名, parse_map, list_data]关系
 
@@ -26,6 +28,30 @@ class ExportWorkBook(BaseWorkBook):
     def __check_sheet_map_index_unique(self, index):
         if index in self.sheet_map:
             raise Exception("the index {index} of sheet_map is not unique".format(index=index))
+
+    def _check_map_index_unique(self, parse_map):
+        '''
+        验证index是否唯一
+        :param parse_map:
+        :return:
+        '''
+        index_list = []
+        for field_name, build_field in parse_map.items():
+            # 设置field的自身__name属性
+            build_field.name = field_name
+            if build_field.index in index_list:
+                raise Exception("the index {index} of field '{name}' is not unique".format(index=build_field.index, name=field_name))
+            index_list.append(build_field.index)
+
+    def thread(self, max_workers):
+        '''
+        开启多线程模式
+        :param max_workers 最大线程数
+        :return:
+        '''
+        self.sync = False
+        self.max_workers = max_workers
+        return self
 
     def set_sheet_map(self, index, data, parse_map, sheet_name=None, title_style=None):
         '''

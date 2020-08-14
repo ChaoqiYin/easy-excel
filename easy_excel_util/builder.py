@@ -10,6 +10,7 @@ class Builder(object):
     '''
     构造类，主要用于设置导入/导出时的数据转换方法，下面的key对应ctype_text中的类型
     '''
+
     def __init__(self):
         '''
         初始化
@@ -40,8 +41,17 @@ class Builder(object):
         self.converters[get_converters_key(data_type_class, False)] = func
         return self
 
-    def build_import(self, file_path, file_content=None):
-        return ImportWorkbook(file_path, file_content, self.converters.copy())
+    def build_import(self, file, parse_map, sheet_no=0, start_row_num=0, end_row_num=None):
+        '''
+        生成导入实例
+        :param file: 文件路径或者可read()的文件
+        :param parse_map: 解析的字典
+        :param sheet_no: 解析的表格索引
+        :param start_row_num: 从第几行开始解析
+        :param end_row_num: 到第几行结束
+        :return:
+        '''
+        return ImportWorkbook(file, parse_map, self.converters.copy(), sheet_no, start_row_num, end_row_num)
 
     def build_export(self, file_path_or_stream):
         return ExportWorkBook(file_path_or_stream, self.converters.copy())
