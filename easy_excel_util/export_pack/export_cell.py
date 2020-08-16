@@ -21,7 +21,8 @@ class ExportCell(object):
         self.cell_data = cell_data
         self.export_field = export_field
 
-    def get_sheet(self):
+    @property
+    def sheet(self):
         return self.export_row.export_sheet.work_sheet
 
     def get_converter(self, cell_data):
@@ -67,15 +68,15 @@ class ExportCell(object):
         获取表格抬头样式
         :return:
         '''
-        return self.export_row.export_sheet.title_style or DEFAULT_TITLE_STYLE
+        return self.export_row.export_sheet.sheet_map.title_style or DEFAULT_TITLE_STYLE
 
     def write_title_cell(self):
         '''
         写入title单元格数据
         :return:
         '''
-        self.get_sheet().write(self.export_row.row_num, self.export_field.index, str(self.cell_data), self.get_title_style())
-        self.get_sheet().col(self.export_field.index).width = 250 * 20  # 20为基准数, 设置列宽
+        self.sheet.write(self.export_row.row_num, self.export_field.index, str(self.cell_data), self.get_title_style())
+        self.sheet.col(self.export_field.index).width = 250 * self.export_row.export_sheet.sheet_map.col_width  # 20为基准数, 设置列宽
 
     def get_style(self):
         '''
@@ -98,4 +99,4 @@ class ExportCell(object):
         value = self.converter_del_value(value)  # 首先转换
         if type(value) == datetime.datetime or type(value) == time.struct_time:
             value = self.format_str_to_datetime(value)  # 然后格式化
-        self.get_sheet().write(self.export_row.row_num, self.export_field.index, str(value), self.get_style())
+        self.sheet.write(self.export_row.row_num, self.export_field.index, str(value), self.get_style())

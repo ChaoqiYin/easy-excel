@@ -8,7 +8,7 @@ from ..utils import sort_dict_data, sort_dict_list_data
 
 
 class ImportSheet(object):
-    def __init__(self, sheet, parse_map, error_message_prefix, sheet_no, start_row_num, end_row_num, max_workers,
+    def __init__(self, excel_workbook, sheet, parse_map, error_message_prefix, sheet_no, start_row_num, end_row_num, max_workers,
                  row_del_class, row_validate_func):
         '''
         init
@@ -22,6 +22,7 @@ class ImportSheet(object):
         :param row_del_class: 解析处理row的类，默认是ImportRow
         :param row_validate_func: 行验证方法
         '''
+        self.excel_workbook = excel_workbook
         self.__sheet = sheet
         self.parse_map = parse_map
         self.error_message_prefix = error_message_prefix or '第{row_num}行'

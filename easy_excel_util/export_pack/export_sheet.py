@@ -3,30 +3,31 @@
 # Author: ChaoqiYin
 from concurrent.futures import ThreadPoolExecutor, wait
 
+from .export_row import ExportRow
+
 
 class ExportSheet(object):
 
-    def __init__(self, excel_workbook, wb, row_del_class, row_validate_func, sheet_no, sheet_info):
+    def __init__(self, excel_workbook, workbook, sheet_no, sheet_map, max_workers, row_del_class, row_validate_func):
         '''
         init
         :param excel_workbook: BaseWorkbook子类实例
-        :param wb: workbook待写入文件
+        :param workbook: workbook待写入文件
+        :param sheet_no: 表格索引
+        :param sheet_map: sheet_map实例
+        :param max_workers: max_workers
         :param row_del_class: 解析处理row的类
         :param row_validate_func: 行处理方法
-        :param sheet_no: 表格索引
-        :param sheet_info: sheet_name, parse_map, data 待导出的信息
         '''
         self.excel_workbook = excel_workbook
+        self.workbook = workbook
+        self.work_sheet = workbook.add_sheet(sheet_map.sheet_name)
+        self.sheet_no = sheet_no
+        self.sheet_map = sheet_map
+        self.max_workers = max_workers
         self.row_del_class = row_del_class
         self.row_validate_func = row_validate_func  # 自定义的行处理方法，未自定义时为None
-        self.sheet_no = sheet_no
-        self.sheet_info = sheet_info
-        self.wb = wb
-        self.sheet_name = sheet_info.sheet_name
-        self.parse_map = sheet_info.parse_map
-        self.list_data = sheet_info.list_data
-        self.title_style = sheet_info.title_style
-        self.work_sheet = None
+
 
     def sync_parse(self):
         '''
@@ -36,7 +37,7 @@ class ExportSheet(object):
         row_num = 0
         # 后期可能会添加自定义抬头
         self.add_title(row_num)
-        for row_data in self.list_data:
+        for row_data in self.sheet_map.list_data:
             row_num += 1
             self.add_row(row_num, row_data)
 
@@ -50,11 +51,11 @@ class ExportSheet(object):
 
         work_list = []
         # 创建线程池
-        with ThreadPoolExecutor(max_workers=self.excel_workbook.max_workers) as executor:
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             row_num = 0
             # 后期可能会添加自定义抬头
             self.add_title(row_num)
-            for row_data in self.list_data:
+            for row_data in self.sheet_map.list_data:
                 row_num += 1
                 future = executor.submit(work_func, self, row_num, row_data)
                 work_list.append(future)
@@ -68,23 +69,22 @@ class ExportSheet(object):
         :return:
         '''
         self.work_sheet.row(row_num).height_mismatch = True
-        self.work_sheet.row(row_num).height = 40 * 20  # 20为基准数
+        self.work_sheet.row(row_num).height = 40 * self.sheet_map.row_height  # 20为基准数
 
     def add_title(self, row_num):
         '''
         添加sheet标题栏
         :return:
         '''
-        self.row_del_class(self, row_num, []).write_title()
         self.set_row_height(row_num)
+        ExportRow(self, row_num, []).write_title()
 
     def add_row(self, row_num, row_data):
-        self.row_del_class(self, row_num, row_data).write_row()
         self.set_row_height(row_num)
+        self.row_del_class(self, row_num, row_data).write_row()
 
     def parse_export(self):
-        self.work_sheet = self.wb.add_sheet(self.sheet_name)
-        if self.excel_workbook.sync is True:
+        if self.max_workers is None:
             self.sync_parse()
         else:
             self.thread_parse()

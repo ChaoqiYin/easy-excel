@@ -16,19 +16,20 @@ class ExportRow(object):
         self.row_num = row_num
         self.row_data = row_data
 
-    def get_parse_map(self):
+    @property
+    def parse_map(self):
         '''
         获取解析字段的map映射
         :return:
         '''
-        return self.export_sheet.parse_map
+        return self.export_sheet.sheet_map.parse_map
 
     def write_title(self):
         '''
         写入title数据
         :return:
         '''
-        for export_field_name, export_field in self.get_parse_map().items():
+        for export_field_name, export_field in self.parse_map.items():
             ExportCell(self, export_field.col_name or export_field.name, export_field).write_title_cell()
 
     def write_row(self):
@@ -36,7 +37,7 @@ class ExportRow(object):
         写入行数据
         :return:
         '''
-        for export_field_name, export_field in self.get_parse_map().items():
+        for export_field_name, export_field in self.parse_map.items():
             # 判断是否有这个key
             if self.row_data.get(export_field_name, None) is not None:
                 ExportCell(self, self.row_data[export_field_name], export_field).write_cell()

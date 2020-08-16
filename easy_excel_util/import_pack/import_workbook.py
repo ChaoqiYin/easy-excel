@@ -66,7 +66,7 @@ class ImportWorkbook(object):
         '''
         rel_row_del_class = ImportRow if row_del_class is None else row_del_class
         workbook = turn_file_to_excel(self.file_path, self.file)
-        sheet = ImportSheet(workbook.sheet_by_index(sheet_no), parse_map, error_message_prefix, sheet_no,
+        sheet = ImportSheet(self, workbook.sheet_by_index(sheet_no), parse_map, error_message_prefix, sheet_no,
                             start_row_num, end_row_num, max_workers, rel_row_del_class, row_validate_func)
         self.__result_value = sheet.get_value()
 
