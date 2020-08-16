@@ -44,7 +44,7 @@ class ExportRow(object):
         '''
         self.set_row_height()
         for export_field_name, export_field in self.parse_map.items():
-            ExportCell(self, export_field.col_name or export_field.name, export_field).write_title_cell()
+            ExportCell(self, export_field.name, export_field).write_title_cell()
 
     def write_row(self):
         '''

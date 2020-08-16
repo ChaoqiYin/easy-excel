@@ -20,7 +20,7 @@ class BaseField(object):
 
     @property
     def name(self):
-        return self.__name
+        return self.col_name or self.__name
 
     @name.setter
     def name(self, name):
