@@ -28,7 +28,6 @@ class ExportSheet(object):
         self.row_del_class = row_del_class
         self.row_validate_func = row_validate_func  # 自定义的行处理方法，未自定义时为None
 
-
     def sync_parse(self):
         '''
         同步方式进行解析
@@ -62,25 +61,14 @@ class ExportSheet(object):
             # 等待完成
             wait(work_list)
 
-    def set_row_height(self, row_num):
-        '''
-        设置行高
-        :param row_num:
-        :return:
-        '''
-        self.work_sheet.row(row_num).height_mismatch = True
-        self.work_sheet.row(row_num).height = 40 * self.sheet_map.row_height  # 20为基准数
-
     def add_title(self, row_num):
         '''
         添加sheet标题栏
         :return:
         '''
-        self.set_row_height(row_num)
         ExportRow(self, row_num, []).write_title()
 
     def add_row(self, row_num, row_data):
-        self.set_row_height(row_num)
         self.row_del_class(self, row_num, row_data).write_row()
 
     def parse_export(self):

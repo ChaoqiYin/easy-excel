@@ -68,7 +68,7 @@ class ImportCell(object):
         message = None
         if self.import_field.required_message is not None and value is None:
             message = self.get_error_message_template().format(
-                row_num=self.import_row.row_num,
+                row_num=self.import_row.row_num + 1,  # 索引数加1
                 col_name=self.import_field.col_name or self.import_field.name,
                 message=self.import_field.required_message
             )

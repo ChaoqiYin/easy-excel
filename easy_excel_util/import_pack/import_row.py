@@ -59,6 +59,7 @@ class ImportRow(object):
         # 遍历找寻对应的字段信息组装为ReaderData对象
         reader_data = ReaderData(self.row_num)
         for field_name, build_field in self.parse_map.items():
+            build_field.name = field_name
             result_map = self.matching_index_value(build_field)
             setattr(reader_data, field_name, result_map.get('result'))
             # 根据校验是否成功添加错误信息

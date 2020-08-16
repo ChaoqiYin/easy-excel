@@ -10,11 +10,7 @@ from ..utils import get_converters_key
 
 def turn_file_to_excel(file_path, file):
     if file is not None:
-        workbook = xlrd.open_workbook(file_contents=file.read(), formatting_info=True)
-        try:
-            file.close()
-        except Exception as e:
-            pass
+        workbook = xlrd.open_workbook(file_contents=file, formatting_info=True)
     else:
         with open(file_path, encoding='utf8') as f:
             content = f.read()
@@ -25,10 +21,10 @@ def turn_file_to_excel(file_path, file):
 def get_file_path_or_content(p_file):
     file_path = None
     file = None
-    if hasattr(file, 'read'):
-        file = p_file
-    else:
+    if isinstance(p_file, str):
         file_path = p_file
+    else:
+        file = p_file
     return file_path, file
 
 
