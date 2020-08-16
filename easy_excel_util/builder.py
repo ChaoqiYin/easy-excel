@@ -46,17 +46,13 @@ class Builder(object):
         return cls
 
     @staticmethod
-    def build_import(file, parse_map, sheet_no=0, start_row_num=0, end_row_num=None):
+    def build_import(file):
         '''
         生成导入实例
         :param file: 文件路径或者可read()的文件
-        :param parse_map: 解析的字典
-        :param sheet_no: 解析的表格索引
-        :param start_row_num: 从第几行开始解析
-        :param end_row_num: 到第几行结束
         :return:
         '''
-        return ImportWorkbook(file, parse_map, _converters.copy(), sheet_no, start_row_num, end_row_num)
+        return ImportWorkbook(file, _converters.copy())
 
     @staticmethod
     def build_export(file_path_or_stream):

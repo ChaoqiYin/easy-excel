@@ -29,21 +29,13 @@ def get_file_path_or_content(p_file):
         file = p_file
     else:
         file_path = p_file
-    return file, file_path
+    return file_path, file
 
 
 class ImportWorkbook(object):
-    def __init__(self, file, parse_map, converters, sheet_no=0, start_row_num=0, end_row_num=None):
-        p_file_tuple = get_file_path_or_content(file)
-        self.file_path = p_file_tuple[0]  # 文件路径
+    def __init__(self, file, converters):
+        self.file_path, self.file = get_file_path_or_content(file)  # 文件路径和文件内容，文件内容有值时，文件路径会失效
         self.converters = converters  # 转换类
-        self.sync = True  # 是否为同步模式
-        self.max_workers = 3  # 异步最大线程数
-        self.file = p_file_tuple[1]  # 文件内容，文件内容不为None时file_path会失效
-        self.sheet_no = sheet_no  # sheet位置，从0开始，默认0
-        self.parse_map = parse_map  # 解析map对照
-        self.start_row_num = start_row_num  # 从第几行开始解析，默认0开始
-        self.end_row_num = end_row_num  # 到第几行停止，默认None
         self.__result_value = None
 
     def add_converter(self, converter_key, func):
@@ -58,33 +50,24 @@ class ImportWorkbook(object):
         self.converters[get_converters_key(converter_key, True)] = func
         return self
 
-    def set_mode(self, max_workers):
-        '''
-        开启多线程模式
-        :param max_workers 最大线程数
-        :return:
-        '''
-        if max_workers is False or max_workers is None:
-            self.sync = True
-        else:
-            self.sync = False
-            self.max_workers = max_workers
-
-    def do_import(self, max_workers=False, error_message_prefix=None, row_del_class=None, row_validate_func=None):
+    def do_import(self, parse_map, error_message_prefix=None, sheet_no=0, start_row_num=0, end_row_num=None,
+                  max_workers=None, row_del_class=None, row_validate_func=None):
         '''
         导入启动方法
-        :param max_workers: 异步最大线程数，为None或False时使用同步模式
+        :param parse_map: 解析的字典
         :param error_message_prefix: 报错提示的前缀文字, 默认是'第{row_num}'
+        :param sheet_no: 解析的表格索引
+        :param start_row_num: 从第几行开始解析
+        :param end_row_num: 到第几行结束
+        :param max_workers: 异步最大线程数，为None时使用同步模式
         :param row_del_class: 默认的行处理类, 需要是ImportRow的子类
         :param row_validate_func: 行验证方法，返回一个list，里面是该行的错误消息，会自动拼接上error_message_prefix
         :return:
         '''
-        self.set_mode(max_workers)
         rel_row_del_class = ImportRow if row_del_class is None else row_del_class
         workbook = turn_file_to_excel(self.file_path, self.file)
-        sheet = ImportSheet(self, workbook.sheet_by_index(self.sheet_no), sheet_no=self.sheet_no,
-                            start_row_num=self.start_row_num, row_del_class=rel_row_del_class,
-                            error_message_prefix=error_message_prefix, row_validate_func=row_validate_func)
+        sheet = ImportSheet(workbook.sheet_by_index(sheet_no), parse_map, error_message_prefix, sheet_no,
+                            start_row_num, end_row_num, max_workers, rel_row_del_class, row_validate_func)
         self.__result_value = sheet.get_value()
 
     @property

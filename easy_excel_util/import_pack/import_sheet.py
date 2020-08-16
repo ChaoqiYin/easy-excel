@@ -8,34 +8,34 @@ from ..utils import sort_dict_data, sort_dict_list_data
 
 
 class ImportSheet(object):
-    def __init__(self, excel_workbook, sheet, sheet_no, start_row_num,
-                 row_del_class, error_message_prefix, row_validate_func):
+    def __init__(self, sheet, parse_map, error_message_prefix, sheet_no, start_row_num, end_row_num, max_workers,
+                 row_del_class, row_validate_func):
         '''
         init
-        :param excel_workbook: ExcelWorkbook实例
         :param sheet: sheet表格内容
-        :param sheet_no: sheet索引
-        :param start_row_num: row索引
+        :param parse_map: 解析的字典
+        :param error_message_prefix: 报错提示的前缀文字, 默认是'第{row_num}'
+        :param sheet_no: 解析的表格索引
+        :param start_row_num: 从第几行开始解析
+        :param end_row_num: 到第几行结束
+        :param max_workers: 异步最大线程数，为None时使用同步模式
         :param row_del_class: 解析处理row的类，默认是ImportRow
+        :param row_validate_func: 行验证方法
         '''
-
-        self.excel_workbook = excel_workbook
+        self.__sheet = sheet
+        self.parse_map = parse_map
+        self.error_message_prefix = error_message_prefix or '第{row_num}行'
+        self.sheet_no = sheet_no
+        self.start_row_num = start_row_num
+        self.total_row_num = end_row_num or sheet.nrows  # 总行数
+        self.total_col_num = sheet.ncols  # 总列数
+        self.max_workers = max_workers
         self.row_del_class = row_del_class
         self.row_validate_func = row_validate_func  # 自定义的行处理方法，未自定义时为None
-        self.sheet_no = sheet_no
-        self.__sheet = sheet
-        self.start_row_num = start_row_num
-        self.total_row_num = sheet.nrows  # 总行数
-        self.total_col_num = sheet.ncols  # 总列数
         self.title_map = {}
-        self.error_message_prefix = error_message_prefix or '第{row_num}行'
         self.reader_data_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
         self.error_message_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
         self.merge_cell_value_map = {}  # 存储合并单元格数据的map
-
-    @property
-    def parse_map(self):
-        return self.excel_workbook.parse_map
 
     def set_title_map(self):
         '''
@@ -88,7 +88,7 @@ class ImportSheet(object):
         同步方式进行解析
         :return:
         '''
-        for row_num in range(self.start_row_num, self.excel_workbook.end_row_num or self.total_row_num):
+        for row_num in range(self.start_row_num, self.total_row_num):
             self.parse_row(row_num)
 
     def thread_parse(self):
@@ -102,8 +102,8 @@ class ImportSheet(object):
 
         work_list = []
         # 创建线程池
-        with ThreadPoolExecutor(max_workers=self.excel_workbook.max_workers) as executor:
-            for row_num in range(self.start_row_num, self.excel_workbook.end_row_num or self.total_row_num):
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            for row_num in range(self.start_row_num, self.total_row_num):
                 future = executor.submit(work_func, self, row_num)
                 work_list.append(future)
             # 等待完成
@@ -116,7 +116,7 @@ class ImportSheet(object):
         '''
         self.del_merged_cells()
         self.set_title_map()
-        if self.excel_workbook.sync is True:
+        if self.max_workers is None:
             self.sync_parse()
         else:
             self.thread_parse()
