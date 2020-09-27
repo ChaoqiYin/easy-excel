@@ -14,7 +14,7 @@ class Xls(Base):
     @property
     def merged_cells(self):
         '''
-        返回合并单元格的列表[(start_row, end_row, start_col, end_col)...]
+        返回合并单元格的列表[(start_row, end_row, start_col, end_col)...], tuple前闭后开
         :return:
         '''
         return self.sheet.merged_cells

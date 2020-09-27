@@ -16,13 +16,12 @@ def turn_file_to_excel_workbook(file, sheet_no):
         workbook = type_factory.get('xlsx')(load_workbook(file, data_only=True), sheet_no)
     else:
         workbook = type_factory.get('xls')(xlrd.open_workbook(file_contents=file.read(), formatting_info=True), sheet_no)
-    try:
-        file.close()
-    except Exception as e:
-        # 尝试关闭文件，不能关闭也无所谓
-        pass
-    finally:
-        return workbook
+        try:
+            file.close()
+        except Exception as e:
+            # 尝试关闭文件，不能关闭也无所谓
+            pass
+    return workbook
 
 
 class ImportWorkbook(object):
@@ -53,7 +52,7 @@ class ImportWorkbook(object):
         :param end_row_num: 到第几行结束
         :param max_workers: 异步最大线程数，为None时使用同步模式
         :param row_del_class: 默认的行处理类, 需要是ImportRow的子类
-        :param row_validate_func: 行验证方法，返回一个list，里面是该行的错误消息，会自动拼接上error_message_prefix
+        :param row_validate_func: 行验证方法，接收4个参数：（行索引，行原始数据，行转换后的数据，parse_map），返回None或一个list，里面是该行的错误消息，会自动拼接上error_message_prefix
         :return:
         '''
         rel_row_del_class = ImportRow if row_del_class is None else row_del_class

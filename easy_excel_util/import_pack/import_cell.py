@@ -84,7 +84,7 @@ class ImportCell(object):
         '''
         if self.import_field.datetime_format is None:
             return value
-        return datetime.datetime.strptime(value, self.import_field.datetime_format)
+        return datetime.datetime.strptime(str(value), self.import_field.datetime_format)
 
     def deserialize_cell(self):
         '''
@@ -100,7 +100,7 @@ class ImportCell(object):
         :return:
         '''
         if self.cell.ctype == 3:  # 日期格式数据，需要转换为datetime
-            value = self.excel(self.cell.value)
+            value = self.excel.del_datetime(self.cell.value)
         elif self.cell.ctype == 4:  # 布尔类型，传入时是0或1，转换为True或False
             value = self.cell.value == 1
         elif self.cell.ctype in (0, 5, 6):  # 空/错误类型/空白，直接设置为None
@@ -113,11 +113,8 @@ class ImportCell(object):
             try:
                 value = self.format_str_to_datetime(value)
             except Exception as e:
-                message = self.get_error_message_template().format(
-                    row_num=self.import_row.row_num,
-                    col_name=self.import_field.col_name or self.import_field.name,
-                    message='不满足{}格式'.format(self.import_field.datetime_format)
-                )
+                # 不能转换格式的直接忽略不转换
+                pass
         # 格式转换处理
         return {
             'success': message is None,

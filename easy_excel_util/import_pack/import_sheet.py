@@ -71,7 +71,7 @@ class ImportSheet(object):
         '''
         result = self.row_del_class(self, row_num).get_value()
         if self.row_validate_func is not None:
-            error_message_list = self.row_validate_func(row_num, self.excel.row(row_num), self.parse_map)
+            error_message_list = self.row_validate_func(row_num, self.excel.row(row_num), result, self.parse_map)
             if error_message_list is not None and len(error_message_list) != 0:
                 result['success'] = False
                 # 拼接错误信息
