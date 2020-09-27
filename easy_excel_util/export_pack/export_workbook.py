@@ -39,7 +39,7 @@ class ExportWorkBook(object):
         keys.sort(reverse=False)
         new_map = {}
         for key in keys:
-            new_map[key] = self.sheet_map[key]
+            new_map[key] = self.sheet_map.get(key)
         self.sheet_map = new_map
 
     def do_export(self, max_workers=None, row_del_class=None, row_validate_func=None):

@@ -46,13 +46,13 @@ class Builder(object):
         return cls
 
     @staticmethod
-    def build_import(file):
+    def build_import(file_content):
         '''
         生成导入实例
-        :param file: 文件路径或者可read()的文件
+        :param file_content: 文件content
         :return:
         '''
-        return ImportWorkbook(file, _converters.copy())
+        return ImportWorkbook(file_content, _converters.copy())
 
     @staticmethod
     def build_export(file_path_or_stream):

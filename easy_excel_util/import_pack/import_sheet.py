@@ -8,11 +8,12 @@ from ..utils import sort_dict_data, sort_dict_list_data
 
 
 class ImportSheet(object):
-    def __init__(self, excel_workbook, sheet, parse_map, error_message_prefix, sheet_no, start_row_num, end_row_num, max_workers,
+    def __init__(self, excel_workbook, excel, parse_map, error_message_prefix, sheet_no, start_row_num, end_row_num, max_workers,
                  row_del_class, row_validate_func):
         '''
         init
-        :param sheet: sheet表格内容
+        :param excel_workbook: excel_workbook实例
+        :param excel: factory的excel类实例
         :param parse_map: 解析的字典
         :param error_message_prefix: 报错提示的前缀文字, 默认是'第{row_num}'
         :param sheet_no: 解析的表格索引
@@ -23,13 +24,13 @@ class ImportSheet(object):
         :param row_validate_func: 行验证方法
         '''
         self.excel_workbook = excel_workbook
-        self.__sheet = sheet
+        self.excel = excel
         self.parse_map = parse_map
         self.error_message_prefix = error_message_prefix or '第{row_num}行'
         self.sheet_no = sheet_no
         self.start_row_num = start_row_num
-        self.total_row_num = end_row_num or sheet.nrows  # 总行数
-        self.total_col_num = sheet.ncols  # 总列数
+        self.total_row_num = end_row_num or excel.nrows  # 总行数
+        self.total_col_num = excel.ncols  # 总列数
         self.max_workers = max_workers
         self.row_del_class = row_del_class
         self.row_validate_func = row_validate_func  # 自定义的行处理方法，未自定义时为None
@@ -43,19 +44,19 @@ class ImportSheet(object):
         获取首行的列名和列index的map映射关系
         :return:
         '''
-        total_col_num = self.__sheet.ncols
+        total_col_num = self.excel.ncols
         for col_num in range(0, total_col_num):
-            self.title_map[str(self.__sheet.cell(0, col_num).value)] = col_num
+            self.title_map[str(self.excel.cell(0, col_num).value)] = col_num
 
     def del_merged_cells(self):
         '''
         处理合并单元格
         '''
-        for (start_row, end_row, start_col, end_col) in self.__sheet.merged_cells:
+        for (start_row, end_row, start_col, end_col) in self.excel.merged_cells:
             for row in range(start_row, end_row):  # 起始行和结束行为前闭后开关系，从0开始算
                 for col in range(start_col, end_col):  # 起始列和结束列为前闭后开关系，也是从0开始算
                     if row != start_row or col != start_col:
-                        self.merge_cell_value_map[(row, col)] = self.__sheet.cell(start_row, start_col)
+                        self.merge_cell_value_map[(row, col)] = self.excel.cell(start_row, start_col)
 
     def parse_row(self, row_num):
         '''
@@ -68,9 +69,9 @@ class ImportSheet(object):
         :param row_num:
         :return:
         '''
-        result = self.row_del_class(self, self.__sheet.row(row_num), row_num).get_value()
+        result = self.row_del_class(self, row_num).get_value()
         if self.row_validate_func is not None:
-            error_message_list = self.row_validate_func(row_num, self.__sheet.row(row_num), self.parse_map)
+            error_message_list = self.row_validate_func(row_num, self.excel.row(row_num), self.parse_map)
             if error_message_list is not None and len(error_message_list) != 0:
                 result['success'] = False
                 # 拼接错误信息

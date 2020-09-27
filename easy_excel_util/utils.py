@@ -57,15 +57,6 @@ def get_converters_key(prefix, is_import):
     return str(prefix) + '_' + 'i' if is_import is True else 'r'
 
 
-def xlrd_del_datetime(xldate_value):
-    '''
-    cell时间内容转换为datetime
-    :param xldate_value: cell单元格数据，时间类型
-    :return:
-    '''
-    return xldate_as_datetime(xldate_value, 0)
-
-
 def sort_dict_data(dict_data, reverse=False):
     '''
     对字典数据进行key的排序处理

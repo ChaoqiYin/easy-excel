@@ -21,7 +21,8 @@ VERSION = '1.0.1'
 REQUIRED = [
     'xlrd>=1.2',
     'xlwt>=1.3',
-    'futures>=3.1.1'
+    'futures>=3.1.1',
+    'openpyxl>=3.0.5'
 ]
 
 # What packages are optional?

@@ -6,16 +6,15 @@ from .reader_data import ReaderData
 
 
 class ImportRow(object):
-    def __init__(self, import_sheet, row, row_num):
+    def __init__(self, import_sheet, row_num):
         '''
         init
         :param import_sheet: ImportSheet实例
-        :param row: 解析的excel行内容
         :param row_num: 当前行数，从0开始
         '''
         self.import_sheet = import_sheet
-        self.row = row
         self.row_num = row_num
+        self.row = import_sheet.excel.row(row_num)
 
     @property
     def total_col_num(self):
@@ -42,7 +41,7 @@ class ImportRow(object):
         index = build_field.index
         # 索引值在总列数内的情况
         if (index + 1) <= self.total_col_num:
-            value = ImportCell(self, self.row[index], index, build_field).get_value()
+            value = ImportCell(self, index, build_field).get_value()
         else:
             value = None
         return value

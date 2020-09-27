@@ -2,23 +2,25 @@
 # -*- coding: utf-8 -*-
 # Author: ChaoqiYin
 import datetime
-from ..utils import xlrd_del_datetime, get_converters_key
+from ..utils import get_converters_key
 
 
 class ImportCell(object):
 
-    def __init__(self, import_row, cell, index, import_field):
+    def __init__(self, import_row, index, import_field):
         '''
         init
         :param import_row: ImportRow实例
-        :param cell: 单元格内容
         :param index: 单元格列位置，从0开始
         :param import_field: 导入字段设置
         '''
+        import_sheet = import_row.import_sheet
+        self.excel = import_sheet.excel
         self.import_row = import_row
-        self.cell = import_row.import_sheet.merge_cell_value_map.get((import_row.row_num, index), cell)  # 判断是否属于合并单元格
+        self.cell = import_sheet.merge_cell_value_map.get((import_row.row_num, index), self.excel.cell(import_row.row_num, index))  # 判断是否属于合并单元格
         self.index = index
         self.import_field = import_field
+
 
     def get_error_message_template(self):
         '''
@@ -98,7 +100,7 @@ class ImportCell(object):
         :return:
         '''
         if self.cell.ctype == 3:  # 日期格式数据，需要转换为datetime
-            value = xlrd_del_datetime(self.cell.value)
+            value = self.excel(self.cell.value)
         elif self.cell.ctype == 4:  # 布尔类型，传入时是0或1，转换为True或False
             value = self.cell.value == 1
         elif self.cell.ctype in (0, 5, 6):  # 空/错误类型/空白，直接设置为None

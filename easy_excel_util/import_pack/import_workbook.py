@@ -2,37 +2,33 @@
 # -*- coding: utf-8 -*-
 # Author: ChaoqiYin
 import xlrd
+from openpyxl import load_workbook
 
 from .import_sheet import ImportSheet
 from ..import_pack.import_row import ImportRow
 from ..utils import get_converters_key
+from .factory import type_factory
 
 
-def turn_file_to_excel(file_path, file):
-    if file is not None:
-        workbook = xlrd.open_workbook(file_contents=file, formatting_info=True)
+def turn_file_to_excel_workbook(file, sheet_no):
+    file_name = file.filename
+    if file_name.lower().find('.xlsx') > 0:
+        workbook = type_factory.get('xlsx')(load_workbook(file, data_only=True), sheet_no)
     else:
-        with open(file_path, encoding='utf8') as f:
-            content = f.read()
-            workbook = xlrd.open_workbook(file_contents=content, formatting_info=True)
-    return workbook
-
-
-def get_file_path_or_content(p_file):
-    file_path = None
-    file = None
-    if isinstance(p_file, str):
-        file_path = p_file
-    else:
-        file = p_file
-    return file_path, file
+        workbook = type_factory.get('xls')(xlrd.open_workbook(file_contents=file.read(), formatting_info=True), sheet_no)
+    try:
+        file.close()
+    except Exception as e:
+        # 尝试关闭文件，不能关闭也无所谓
+        pass
+    finally:
+        return workbook
 
 
 class ImportWorkbook(object):
-    def __init__(self, file, converters):
-        self.file_path, self.file = get_file_path_or_content(file)  # 文件路径和文件内容，文件内容有值时，文件路径会失效
+    def __init__(self, file_content, converters):
+        self.file_content = file_content
         self.converters = converters  # 转换类
-        self.__result_value = None
 
     def add_converter(self, converter_key, func):
         '''
@@ -61,31 +57,7 @@ class ImportWorkbook(object):
         :return:
         '''
         rel_row_del_class = ImportRow if row_del_class is None else row_del_class
-        workbook = turn_file_to_excel(self.file_path, self.file)
-        sheet = ImportSheet(self, workbook.sheet_by_index(sheet_no), parse_map, error_message_prefix, sheet_no,
+        excel = turn_file_to_excel_workbook(self.file_content, sheet_no)
+        sheet = ImportSheet(self, excel, parse_map, error_message_prefix, sheet_no,
                             start_row_num, end_row_num, max_workers, rel_row_del_class, row_validate_func)
-        self.__result_value = sheet.get_value()
-
-    @property
-    def success(self):
-        '''
-        解析是否成功
-        :return:
-        '''
-        return self.__result_value.success
-
-    @property
-    def error_message_list(self):
-        '''
-        解析错误信息列表
-        :return:
-        '''
-        return self.__result_value.error_message_list
-
-    @property
-    def result(self):
-        '''
-        解析后的结果列表
-        :return:
-        '''
-        return self.__result_value.result
+        return sheet.get_value()
