@@ -6,7 +6,6 @@ from openpyxl import load_workbook
 
 from .import_sheet import ImportSheet
 from ..import_pack.import_row import ImportRow
-from ..utils import get_converters_key
 from .factory import type_factory
 
 
@@ -38,7 +37,7 @@ class ImportWorkbook(object):
         '''
         if converter_key not in range(0, 7):
             raise Exception("converter_key must in the dict [0, 1, 2, 3, 4, 5, 6] keys")
-        self.converters[get_converters_key(converter_key, True)] = func
+        self.converters[converter_key] = func
         return self
 
     def do_import(self, parse_map, error_message_prefix=None, sheet_no=0, start_row_num=0, end_row_num=None,

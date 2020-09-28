@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # Author: ChaoqiYin
 import datetime
-from ..utils import get_converters_key
 
 
 class ImportCell(object):
@@ -46,7 +45,7 @@ class ImportCell(object):
         if self.import_field.converter is not None:
             return self.import_field.converter
         # 匹配excel_workbook的转换方法，其中excel_workbook中设置的会覆盖builder中设置的转换方法
-        return self.import_row.import_sheet.excel_workbook.converters.get(get_converters_key(ctype, True), None)
+        return self.import_row.import_sheet.excel_workbook.converters.get(ctype, None)
 
     def converter_del_value(self, value, ctype):
         '''

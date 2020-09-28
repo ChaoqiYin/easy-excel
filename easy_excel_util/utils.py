@@ -47,16 +47,6 @@ DEFAULT_TITLE_STYLE.font = font  # 设定样式
 DEFAULT_TITLE_STYLE.borders = borders
 
 
-def get_converters_key(prefix, is_import):
-    '''
-    转换类的key获取方法
-    :param prefix: 类型
-    :param is_import: 是否是导入转换方法
-    :return:
-    '''
-    return str(prefix) + '_' + 'i' if is_import is True else 'r'
-
-
 def sort_dict_data(dict_data, reverse=False):
     '''
     对字典数据进行key的排序处理

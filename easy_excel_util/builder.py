@@ -3,13 +3,18 @@
 # Author: ChaoqiYin
 from .import_pack.import_workbook import ImportWorkbook
 from .export_pack.export_workbook import ExportWorkBook
-from .utils import get_converters_key
-
-# 导入/导出时的数据全局转换方法，key对应ctype_text中的类型
-_converters = {}
 
 
 class Builder(object):
+
+    # 导入/导出时的数据全局转换方法，key对应ctype_text中的类型
+    import_converters = {}
+    export_converters = {}
+    # 导出通用样式
+    _export_style = None
+    # 导出title样式，即第一行样式
+    _export_title_style = None
+
     '''
     构造类，主要用于设置导入/导出时的数据转换方法，下面的key对应ctype_text中的类型
     '''
@@ -24,10 +29,9 @@ class Builder(object):
         if converter_key not in range(0, 7):
             raise Exception("converter_key must in the [0, 1, 2, 3, 4, 5, 6] keys")
         # 检查是否已经设置过这个key的转换方法，提醒
-        key = get_converters_key(converter_key, True)
-        if _converters.get(key, None) is not None:
-            raise Exception("already set import_converter with key: %s" % key)
-        _converters[key] = func
+        if cls.import_converters.get(converter_key, None) is not None:
+            raise Exception("already set import_converter with key: %s" % converter_key)
+        cls.import_converters[converter_key] = func
         return cls
 
     @classmethod
@@ -39,21 +43,31 @@ class Builder(object):
         :return:
         '''
         # 检查是否已经设置过这个key的转换方法，提醒
-        key = get_converters_key(data_type_class, False)
-        if _converters.get(key, None) is not None:
+        if cls.export_converters.get(data_type_class, None) is not None:
             raise Exception("already set export_converter with data_type_class: %s" % key)
-        _converters[key] = func
+        cls.export_converters[data_type_class] = func
         return cls
 
-    @staticmethod
-    def build_import(file_content):
+    @classmethod
+    def add_export_style(cls, style, title_style=None):
+        cls._export_style = style
+        cls._export_title_style = title_style
+        return cls
+
+    @classmethod
+    def build_import(cls, file):
         '''
         生成导入实例
-        :param file_content: 文件content
+        :param file: 文件，可.read()对象
         :return:
         '''
-        return ImportWorkbook(file_content, _converters.copy())
+        return ImportWorkbook(file, cls.import_converters.copy())
 
-    @staticmethod
-    def build_export(file_path_or_stream):
-        return ExportWorkBook(file_path_or_stream, _converters.copy())
+    @classmethod
+    def build_export(cls, file_path_or_stream):
+        '''
+        文件路径或response_stream
+        :param file_path_or_stream:
+        :return:
+        '''
+        return ExportWorkBook(file_path_or_stream, cls.export_converters.copy(), cls._export_style, cls._export_title_style)
