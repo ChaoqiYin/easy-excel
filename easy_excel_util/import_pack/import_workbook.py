@@ -40,7 +40,7 @@ class ImportWorkbook(object):
         self.converters[converter_key] = func
         return self
 
-    def do_import(self, parse_map, error_message_prefix=None, sheet_no=0, start_row_num=0, end_row_num=None,
+    def do_import(self, parse_map, error_message_prefix='第{row_num}行', sheet_no=0, start_row_num=0, end_row_num=None,
                   max_workers=None, row_del_class=None, row_validate_func=None):
         '''
         导入启动方法

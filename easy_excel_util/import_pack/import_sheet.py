@@ -26,7 +26,7 @@ class ImportSheet(object):
         self.excel_workbook = excel_workbook
         self.excel = excel
         self.parse_map = parse_map
-        self.error_message_prefix = error_message_prefix or '第{row_num}行'
+        self.error_message_prefix = error_message_prefix
         self.sheet_no = sheet_no
         self.start_row_num = start_row_num
         self.total_row_num = end_row_num or excel.nrows  # 总行数
@@ -34,19 +34,9 @@ class ImportSheet(object):
         self.max_workers = max_workers
         self.row_del_class = row_del_class
         self.row_validate_func = row_validate_func  # 自定义的行处理方法，未自定义时为None
-        self.title_map = {}
         self.reader_data_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
         self.error_message_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
         self.merge_cell_value_map = {}  # 存储合并单元格数据的map
-
-    def set_title_map(self):
-        '''
-        获取首行的列名和列index的map映射关系
-        :return:
-        '''
-        total_col_num = self.excel.ncols
-        for col_num in range(0, total_col_num):
-            self.title_map[str(self.excel.cell(0, col_num).value)] = col_num
 
     def del_merged_cells(self):
         '''
@@ -117,7 +107,6 @@ class ImportSheet(object):
         :return:
         '''
         self.del_merged_cells()
-        self.set_title_map()
         if self.max_workers is None:
             self.sync_parse()
         else:

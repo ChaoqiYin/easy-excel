@@ -3,8 +3,6 @@
 # Author: ChaoqiYin
 from concurrent.futures import ThreadPoolExecutor, wait
 
-from .export_row import ExportRow
-
 
 class ExportSheet(object):
 
@@ -34,7 +32,6 @@ class ExportSheet(object):
         :return:
         '''
         row_num = 0
-        # 后期可能会添加自定义抬头
         self.add_title(row_num)
         for row_data in self.sheet_map.list_data:
             row_num += 1
@@ -52,7 +49,6 @@ class ExportSheet(object):
         # 创建线程池
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             row_num = 0
-            # 后期可能会添加自定义抬头
             self.add_title(row_num)
             for row_data in self.sheet_map.list_data:
                 row_num += 1
@@ -63,10 +59,10 @@ class ExportSheet(object):
 
     def add_title(self, row_num):
         '''
-        添加sheet标题栏
+        添加sheet标题栏，后期可能会添加自定义抬头，所以传入row_num
         :return:
         '''
-        ExportRow(self, row_num, []).write_title()
+        self.row_del_class(self, row_num, []).write_title()
 
     def add_row(self, row_num, row_data):
         self.row_del_class(self, row_num, row_data).write_row()

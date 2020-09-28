@@ -5,7 +5,7 @@ import datetime
 import time
 from inspect import isfunction
 
-from ..utils import get_converters_key, DEFAULT_STYLE, DEFAULT_TITLE_STYLE
+from ..utils import DEFAULT_STYLE, DEFAULT_TITLE_STYLE
 
 
 class ExportCell(object):
@@ -34,9 +34,8 @@ class ExportCell(object):
         # 如果字段本身设置了转换方法，则优先使用此转换方法
         if self.export_field.converter is not None:
             return self.export_field.converter
-        # 匹配excel_workbook的转换方法，其中excel_workbook中设置的会覆盖builder中设置的转换方法
-        return self.export_row.export_sheet.excel_workbook.converters.get(
-            get_converters_key(type(cell_data), False), None)
+        # 匹配excel_workbook的转换方法
+        return self.export_row.export_sheet.excel_workbook.converters.get(type(cell_data), None)
 
     def converter_del_value(self, cell_data):
         '''
@@ -53,7 +52,7 @@ class ExportCell(object):
     def format_str_to_datetime(self, value):
         '''
         根据字段format转换str为datetime
-        :param value:
+        :param value: datetime或者time
         :return:
         '''
         if self.export_field.datetime_format is None:
@@ -75,17 +74,19 @@ class ExportCell(object):
         写入title单元格数据
         :return:
         '''
+        col_width = self.export_row.export_sheet.sheet_map.col_width or 250
         self.sheet.write(self.export_row.row_num, self.export_field.index, str(self.cell_data), self.get_title_style())
-        self.sheet.col(self.export_field.index).width = 250 * self.export_row.export_sheet.sheet_map.col_width  # 20为基准数, 设置列宽
+        self.sheet.col(self.export_field.index).width = 20 * col_width  # 20为基准数, 设置列宽, 默认250
 
-    def get_style(self):
+    def get_style(self, value):
         '''
         获取普通单元格样式
+        :param value: 转换后的值
         :return:
         '''
         if self.export_field.style is not None:
             if isfunction(self.export_field.style) is True:  # 如果style是一个方法的话
-                return self.export_field.style(self.export_row.row_num, self.cell_data)  # 根据row_num或者cell_data计算style，这里使用原始值计算
+                return self.export_field.style(self.export_row.row_num, self.cell_data, value)  # 根据row_num、cell_data、转换值计算style
             else:
                 return self.export_field.style
         return DEFAULT_STYLE

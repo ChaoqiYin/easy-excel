@@ -34,8 +34,9 @@ class ExportRow(object):
         :param row_num:
         :return:
         '''
+        row_height_base = self.export_sheet.sheet_map.row_height or 40
         self.sheet.row(self.row_num).height_mismatch = True
-        self.sheet.row(self.row_num).height = 40 * self.export_sheet.sheet_map.row_height  # 20为基准数
+        self.sheet.row(self.row_num).height = 20 * row_height_base  # 20为基准数，默认40高
 
     def write_title(self):
         '''
@@ -53,6 +54,11 @@ class ExportRow(object):
         '''
         self.set_row_height()
         for export_field_name, export_field in self.parse_map.items():
-            # 判断是否有这个key
-            if self.row_data.get(export_field_name, None) is not None:
-                ExportCell(self, self.row_data[export_field_name], export_field).write_cell()
+            # 取值，分为对象或字典
+            value = None
+            if hasattr(self.row_data, export_field_name):
+                value = getattr(self.row_data, export_field_name)
+            elif isinstance(self.row_data, dict) and self.row_data.__contains__(export_field_name):
+                value = self.row_data.get(export_field_name)
+            if value is not None:
+                ExportCell(self, value, export_field).write_cell()

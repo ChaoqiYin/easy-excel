@@ -20,7 +20,6 @@ class ImportCell(object):
         self.index = index
         self.import_field = import_field
 
-
     def get_error_message_template(self):
         '''
         获取错误消息模板
