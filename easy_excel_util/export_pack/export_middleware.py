@@ -17,7 +17,7 @@ class Middleware(object):
         self.__max_workers = max_workers
 
     def sheet(self, index, data, parse_map, sheet_name=None, row_height=40, col_width=250, style=None,
-              title_style=None, row_del_class=None):
+              before=None, after=None, title_style=None, row_del_class=None):
         '''
         设置sheet对应map
         :param index: sheet索引, 从0开始
@@ -26,6 +26,8 @@ class Middleware(object):
         :param sheet_name: 表名
         :param row_height: 默认行高
         :param col_width: 默认列宽
+        :param before: 导入第一行前的操作
+        :param after: 导入最后一行后的操作
         :param style: 该sheet单元格样式，不传则使用全局样式, 可以是fun
         :param title_style: 该sheet标题样式，不传则使用全局样式，可以是fun
         :param row_del_class: 行处理的类
@@ -36,4 +38,4 @@ class Middleware(object):
         rel_title_style = title_style or self.__title_style
         # 全局样式可能为None
         sheet_map = dict(index=SheetMap(rel_sheet_name, parse_map, data, row_height, col_width, rel_style, rel_title_style, row_del_class))
-        return ExportWorkBook(self.__file_path, self.__converters, sheet_map, self.__style, self.__title_style)
+        return ExportWorkBook(self.__file_path, self.__converters, sheet_map, before, after, self.__style, self.__title_style)

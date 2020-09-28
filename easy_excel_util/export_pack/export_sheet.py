@@ -75,17 +75,18 @@ class ExportSheet(object):
                 # 结束后赋值给last_row_num
                 last_row_num = row_num
 
-    def sync_parse(self):
+    def sync_parse(self, start_row_num):
         '''
         同步方式进行解析
         :return:
         '''
-        row_num = self.add_title(0)
+        row_num = self.add_title(start_row_num)
         for row_data in self.sheet_map.list_data:
             row_num += 1
             self.add_row(row_num, row_data)
+        return row_num
 
-    def thread_parse(self):
+    def thread_parse(self, start_row_num):
         '''
         异步模式进行解析
         :return:
@@ -96,17 +97,18 @@ class ExportSheet(object):
         work_list = []
         # 创建线程池
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            row_num = self.add_title(0)
+            row_num = self.add_title(start_row_num)
             for row_data in self.sheet_map.list_data:
                 row_num += 1
                 future = executor.submit(work_func, self, row_num, row_data)
                 work_list.append(future)
             # 等待完成
             wait(work_list)
+        return row_num
 
     def add_title(self, row_num):
         '''
-        添加sheet标题栏，后期可能会添加自定义抬头，所以传入row_num, 有col_name的情况才写入title
+        添加sheet标题栏，有before和after，所以传入row_num, 有col_name的情况才写入title
         :return:
         '''
         has_title = False
@@ -123,10 +125,17 @@ class ExportSheet(object):
     def add_row(self, row_num, row_data):
         self.row_del_class(self, row_num, row_data).write_row()
 
-    def parse_export(self):
+    def parse_export(self, before, after):
+        start_row_num = 0
+        # 有before则先执行before
+        if before is not None:
+            start_row_num = before(self.work_sheet, self.sheet_no, self.sheet_map, self.row_del_class)
         if self.max_workers is None:
-            self.sync_parse()
+            row_num = self.sync_parse(start_row_num)
         else:
-            self.thread_parse()
+            row_num = self.thread_parse(start_row_num)
         # 合并相同单元格
         self.merge_same_col()
+        # 有after则执行after
+        if after is not None:
+            after(self.work_sheet, self.sheet_no, row_num, self.sheet_map, self.row_del_class)
