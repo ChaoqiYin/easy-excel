@@ -75,7 +75,7 @@ class ExportCell(object):
         :return:
         '''
         col_width = self.export_row.export_sheet.sheet_map.col_width or 250
-        self.sheet.write(self.export_row.row_num, self.export_field.index, str(self.cell_data), self.get_title_style())
+        self.sheet.write(self.export_row.row_num, self.export_field.index, str(self.cell_data or ''), self.get_title_style())
         self.sheet.col(self.export_field.index).width = 20 * col_width  # 20为基准数, 设置列宽, 默认250
 
     def get_style(self, value):
@@ -100,4 +100,6 @@ class ExportCell(object):
         value = self.converter_del_value(value)  # 首先转换
         if type(value) == datetime.datetime or type(value) == time.struct_time:
             value = self.format_str_to_datetime(value)  # 然后格式化
-        self.sheet.write(self.export_row.row_num, self.export_field.index, str(value), self.get_style())
+        style = self.get_style(value)
+        self.sheet.write(self.export_row.row_num, self.export_field.index, str(value), style)
+        return dict(value=str(value), style=style)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Author: ChaoqiYin
 from .import_pack.import_workbook import ImportWorkbook
-from .export_pack.export_workbook import ExportWorkBook
+from .export_pack.export_middleware import Middleware
 
 
 class Builder(object):
@@ -55,19 +55,21 @@ class Builder(object):
         return cls
 
     @classmethod
-    def build_import(cls, file):
+    def build_import(cls, file, max_workers=None):
         '''
         生成导入实例
         :param file: 文件，可.read()对象
+        :param max_workers: 异步线程数
         :return:
         '''
-        return ImportWorkbook(file, cls.import_converters.copy())
+        return ImportWorkbook(file, cls.import_converters.copy(), max_workers)
 
     @classmethod
-    def build_export(cls, file_path_or_stream):
+    def build_export(cls, file_path_or_stream, max_workers=None):
         '''
         文件路径或response_stream
         :param file_path_or_stream:
+        :param max_workers: 异步线程数
         :return:
         '''
-        return ExportWorkBook(file_path_or_stream, cls.export_converters.copy(), cls._export_style, cls._export_title_style)
+        return Middleware(file_path_or_stream, cls.export_converters.copy(), cls._export_style, cls._export_title_style, max_workers)

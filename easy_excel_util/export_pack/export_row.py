@@ -26,7 +26,7 @@ class ExportRow(object):
         获取解析字段的map映射
         :return:
         '''
-        return self.export_sheet.sheet_map.parse_map
+        return self.export_sheet.parse_map
 
     def set_row_height(self):
         '''
@@ -49,7 +49,7 @@ class ExportRow(object):
 
     def write_row(self):
         '''
-        写入行数据
+        写入行数据, 合并相同单元格
         :return:
         '''
         self.set_row_height()
@@ -61,4 +61,8 @@ class ExportRow(object):
             elif isinstance(self.row_data, dict) and self.row_data.__contains__(export_field_name):
                 value = self.row_data.get(export_field_name)
             if value is not None:
-                ExportCell(self, value, export_field).write_cell()
+                cell = ExportCell(self, value, export_field).write_cell()
+                if export_field.merge_same is True:
+                    # 获取该列索引，查找相邻且数据相同的值
+                    index = export_field.index
+                    self.export_sheet.add_col_data_to_map(index, self.row_num, cell['value'], cell['style'])

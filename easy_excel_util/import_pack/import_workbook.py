@@ -24,9 +24,10 @@ def turn_file_to_excel_workbook(file, sheet_no):
 
 
 class ImportWorkbook(object):
-    def __init__(self, file_content, converters):
+    def __init__(self, file_content, converters, max_workers):
         self.file_content = file_content
         self.converters = converters  # 转换类
+        self.max_workers = max_workers
 
     def add_converter(self, converter_key, func):
         '''
@@ -41,7 +42,7 @@ class ImportWorkbook(object):
         return self
 
     def do_import(self, parse_map, error_message_prefix='第{row_num}行', sheet_no=0, start_row_num=0, end_row_num=None,
-                  max_workers=None, row_del_class=None, row_validate_func=None):
+                  row_del_class=None, row_validate_func=None):
         '''
         导入启动方法
         :param parse_map: 解析的字典
@@ -49,7 +50,6 @@ class ImportWorkbook(object):
         :param sheet_no: 解析的表格索引
         :param start_row_num: 从第几行开始解析
         :param end_row_num: 到第几行结束
-        :param max_workers: 异步最大线程数，为None时使用同步模式
         :param row_del_class: 默认的行处理类, 需要是ImportRow的子类
         :param row_validate_func: 行验证方法，接收4个参数：（行索引，行原始数据，行转换后的数据，parse_map），返回None或一个list，里面是该行的错误消息，会自动拼接上error_message_prefix
         :return:
@@ -57,5 +57,5 @@ class ImportWorkbook(object):
         rel_row_del_class = ImportRow if row_del_class is None else row_del_class
         excel = turn_file_to_excel_workbook(self.file_content, sheet_no)
         sheet = ImportSheet(self, excel, parse_map, error_message_prefix, sheet_no,
-                            start_row_num, end_row_num, max_workers, rel_row_del_class, row_validate_func)
+                            start_row_num, end_row_num, self.max_workers, rel_row_del_class, row_validate_func)
         return sheet.get_value()
