@@ -55,21 +55,17 @@ class Builder(object):
         return cls
 
     @classmethod
-    def build_import(cls, file, max_workers=None):
+    def build_import(cls, file):
         '''
         生成导入实例
         :param file: 文件，可.read()对象
-        :param max_workers: 异步线程数
         :return:
         '''
-        return ImportWorkbook(file, cls.import_converters.copy(), max_workers)
+        return ImportWorkbook(file, cls.import_converters.copy())
 
     @classmethod
-    def build_export(cls, file_path_or_stream, max_workers=None):
+    def build_export(cls):
         '''
-        文件路径或response_stream
-        :param file_path_or_stream:
-        :param max_workers: 异步线程数
         :return:
         '''
-        return Middleware(file_path_or_stream, cls.export_converters.copy(), cls._export_style, cls._export_title_style, max_workers)
+        return Middleware(cls.export_converters.copy(), cls._export_style, cls._export_title_style)
