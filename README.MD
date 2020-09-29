@@ -1,25 +1,67 @@
 # easy-excel  
 
-**excel操作简化，包含导入和导出功能。支持配置字段转换方法、选择异步或同步解析、自定义行校验方法、自定义行校验类、配置报错信息前缀、str字段根据格式转换为datetime格式**  
+**excel操作简化，包含导入和导出功能。省去平时频繁的重复操作，同时支持xls和xlsx**  
 
 安装方式：  
 1. 下载文件内的easy_excel_util包使用
 2. pip install easy-excel-util
 
-用法：  
-+ 通用配置  
-    首先需要实例化一个Builder类来进行下一步导入或导出操作，可以设置为一个全局实例，该实例能进行一些导入或导出需要使用的统一配置
++ 最简单的使用方法
+    ```python
+    # 数据导出excel
+    from easy_excel_util import Builder, ExportField
+  
+    data = [{'id': 1, 'name': '姓名1', 'age': 18}, {'id': 2, 'name': '姓名2', 'age': 20}]
+    
+    Builder.build_export().sheet(
+        0, data, dict(
+            id=ExportField(index=0, col_name='id'), name=ExportField(1, col_name='姓名'), age=ExportField(2, col_name='年龄')
+        )
+    ).do_export('/User/ChaoqiYin/excel1.xls')
+  
+    # 导入excel读取数据
+    from easy_excel_util import Builder, ImportField
+
+    r = Builder.build_import('/User/ChaoqiYin/excel1.xls').do_import(dict(
+        id=ImportField(0), name=ImportField(1), age=ImportField(2)
+    ))
+    for field in r.result:
+        print(field.id, field.name, field.age)
+    ```
+
++ 高级设置  
+    首先需要引入Builder类，该类能进行一些导入或导出需要使用的全局统一配置
     ```python
     from easy_excel_util import Builder
-    
-    build = Builder()
     ```
-    Builder的实例提供了以下几种方法进行全局的配置：  
-    * add_import_converter(converter_key, func)：添加一个全局的导入时数据转换方法，根据converter_key的不同会对对应的excel表格内数据进行转换    
+    Builder提供了以下几种方法进行全局的配置：  
+    * add_export_style(style, title_style=None)：添加一个全局的导出样式，根据导出excel类型不同使用不同的style    
         ```python
-        from easy_excel_util import EMPTY, TEXT, NUMBER, DATE, BOOLEAN, ERROR, BLANK
+        # xlsx类型的excel样式, 样式必须是一个dict，key是openpyxl库中cell的样式对应的属性名，value是对应的属性值
+        from openpyxl.styles import Font
         
-        builder.add_import_converter(NUMBER, func=lambda value: str(value))  # func接收一个value参数，该值为excel单元格内的数据
+        Builder.add_export_style({
+            'font': Font(name='Arial', size=14),
+        }, title_style={
+            'font': Font(name='Arial', size=18, bold=True),
+        })
+      
+        # xls类型的excel样式，样式是一个xlwt库的XFStyle实例
+        import xlwt
+      
+        DEFAULT_STYLE = xlwt.XFStyle()
+        al = xlwt.Alignment()
+        al.wrap = 1  # 自动换行
+        al.horz = 0x02  # 设置水平居中
+        al.vert = 0x01  # 设置垂直居中
+        DEFAULT_STYLE.alignment = al
+        font = xlwt.Font()  # 为样式创建字体
+        # 字体大小，14为字号，20为衡量单位
+        font.name = 'Arial'
+        font.height = 10 * 20
+        DEFAULT_STYLE.font = font
+        
+        Builder.add_export_style(DEFAULT_STYLE)
         ```  
     * add_export_converter(data_type_class, func)：添加一个全局的导出时数据转换方法，data_type_class是需要待转换的python数据类型，根据data_type_class的不同会对对应的python数据进行转换 
         ```python
