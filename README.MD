@@ -1,4 +1,5 @@
 # easy-excel  
+##### version: 2.0+
 
 **excel操作简化，包含导入和导出功能。省去平时频繁的重复操作，同时支持xls和xlsx**  
 
@@ -30,12 +31,8 @@
     ```
 
 + 高级设置  
-    首先需要引入Builder类，该类能进行一些导入或导出需要使用的全局统一配置
-    ```python
-    from easy_excel_util import Builder
-    ```
-    Builder提供了以下几种方法进行全局的配置：  
-    * add_export_style(style, title_style=None)：添加一个全局的导出样式，根据导出excel类型不同使用不同的style    
+    Builder类能进行一些导入或导出需要使用的全局统一配置，提供了以下几种类方法进行全局的配置：  
+    * add_export_style(style, title_style=None, xlsx=False)：添加一个全局的导出样式，根据导出excel类型不同使用不同的style, xls和xlsx的样式可以同时存在    
         ```python
         # xlsx类型的excel样式, 样式必须是一个dict，key是openpyxl库中cell的样式对应的属性名，value是对应的属性值
         from openpyxl.styles import Font
@@ -44,7 +41,7 @@
             'font': Font(name='Arial', size=14),
         }, title_style={
             'font': Font(name='Arial', size=18, bold=True),
-        })
+        }, xlsx=True)
       
         # xls类型的excel样式，样式是一个xlwt库的XFStyle实例
         import xlwt
