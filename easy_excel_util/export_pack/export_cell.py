@@ -76,6 +76,7 @@ class ExportCell(object):
         '''
         获取普通单元格样式
         :param value: 转换后的值
+        :param is_title: 是否是title
         :return:
         '''
         if self.export_field.style is not None:
@@ -83,7 +84,7 @@ class ExportCell(object):
                 return self.export_field.style(self.export_row.row_num, self.cell_data, value)  # 根据row_num、cell_data、转换值计算style
             else:
                 return self.export_field.style
-        return None
+        return self.export_row.export_sheet.sheet_map.style
 
     def write_cell(self):
         '''

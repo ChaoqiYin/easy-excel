@@ -12,8 +12,10 @@ class Builder(object):
     export_converters = {}
     # 导出通用样式
     _export_style = None
+    _export_xlsx_style = None
     # 导出title样式，即第一行样式
     _export_title_style = None
+    _export_title_xlsx_style = None
 
     '''
     构造类，主要用于设置导入/导出时的数据转换方法，下面的key对应ctype_text中的类型
@@ -49,9 +51,13 @@ class Builder(object):
         return cls
 
     @classmethod
-    def add_export_style(cls, style, title_style=None):
-        cls._export_style = style
-        cls._export_title_style = title_style
+    def add_export_style(cls, style, title_style=None, xlsx=False):
+        if xlsx is False:
+            cls._export_style = style
+            cls._export_title_style = title_style
+        else:
+            cls._export_xlsx_style = style
+            cls._export_title_xlsx_style = title_style
         return cls
 
     @classmethod
@@ -68,4 +74,6 @@ class Builder(object):
         '''
         :return:
         '''
-        return Middleware(cls.export_converters.copy(), cls._export_style, cls._export_title_style, xlsx)
+        style = cls._export_style if xlsx is False else cls._export_xlsx_style
+        title_style = cls._export_title_style if xlsx is False else cls._export_title_xlsx_style
+        return Middleware(cls.export_converters.copy(), style, title_style, xlsx)
