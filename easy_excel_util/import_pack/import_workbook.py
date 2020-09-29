@@ -9,23 +9,39 @@ from ..import_pack.import_row import ImportRow
 from .factory import type_factory
 
 
+def check_is_xlsx(file_name):
+    return file_name.lower().find('.xlsx') > 0
+
+
 def turn_file_to_excel_workbook(file, sheet_no):
-    file_name = file.filename
-    if file_name.lower().find('.xlsx') > 0:
+    is_file_path = False
+    # 判断是路径还是file
+    if isinstance(file, str):
+        file_name = file
+        is_file_path = True
+    else:
+        file_name = file.filename
+    # 判断是不是xlsx
+    if check_is_xlsx(file_name) is True:
         workbook = type_factory.get('xlsx')(load_workbook(file, data_only=True), sheet_no)
     else:
-        workbook = type_factory.get('xls')(xlrd.open_workbook(file_contents=file.read(), formatting_info=True), sheet_no)
-        try:
-            file.close()
-        except Exception as e:
-            # 尝试关闭文件，不能关闭也无所谓
-            pass
+        factory = type_factory.get('xls')
+        # 是路径的情况
+        if is_file_path is True:
+            workbook = factory(xlrd.open_workbook(file_name, formatting_info=True), sheet_no)
+        else:
+            workbook = factory(xlrd.open_workbook(file_contents=file.read(), formatting_info=True), sheet_no)
+            try:
+                file.close()
+            except Exception as e:
+                # 尝试关闭文件，不能关闭也无所谓
+                pass
     return workbook
 
 
 class ImportWorkbook(object):
-    def __init__(self, file_content, converters):
-        self.file_content = file_content
+    def __init__(self, file, converters):
+        self.file = file
         self.converters = converters  # 转换类
 
     def add_converter(self, converter_key, func):
@@ -55,7 +71,7 @@ class ImportWorkbook(object):
         :return:
         '''
         rel_row_del_class = ImportRow if row_del_class is None else row_del_class
-        excel = turn_file_to_excel_workbook(self.file_content, sheet_no)
+        excel = turn_file_to_excel_workbook(self.file, sheet_no)
         sheet = ImportSheet(self, excel, parse_map, error_message_prefix, sheet_no,
                             start_row_num, end_row_num, max_workers, rel_row_del_class, row_validate_func)
         return sheet.get_value()
