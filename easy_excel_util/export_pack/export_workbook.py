@@ -1,23 +1,27 @@
 # !user/bin/env python3
 # -*- coding: utf-8 -*-
 # Author: ChaoqiYin
-import xlwt
-
 from .export_row import ExportRow
 from .export_sheet import ExportSheet
 from .sheet_map import SheetMap
+from .factory import type_factory
+
+BASE_ROW_HEIGHT = 40
+BASE_COL_WIDTH = 20
 
 
 class ExportWorkBook(object):
     def __init__(self, converters, sheet_map, before=None, after=None, style=None,
-                 title_style=None, max_workers=None):
+                 title_style=None, max_workers=None, xlsx=False):
         self.converters = converters  # 转换类
         self.style = style  # 单元格样式
         self.title_style = title_style  # 单元格头样式
-        self.workbook = xlwt.Workbook(encoding='utf-8')
+        self.is_xlsx = xlsx
+        # 根据是否是xlsx生成不同的workbook
+        self.excel = type_factory.get('xls' if xlsx is False else 'xlsx')()
         self.__start_parse(sheet_map, before, after, max_workers)
 
-    def sheet(self, index, data, parse_map, sheet_name=None, row_height=40, col_width=250, before=None, after=None,
+    def sheet(self, index, data, parse_map, sheet_name=None, row_height=BASE_ROW_HEIGHT, col_width=BASE_COL_WIDTH, before=None, after=None,
               style=None, title_style=None, row_del_class=None, max_workers=None):
         '''
         设置sheet对应map
@@ -47,9 +51,7 @@ class ExportWorkBook(object):
         # 升序排序
         for index, sm in sheet_map.items():
             rel_row_del_class = sm.row_del_class or ExportRow
-            ExportSheet(self, self.workbook, index, sm, max_workers=max_workers, row_del_class=rel_row_del_class).parse_export(before, after)
+            ExportSheet(self, self.excel, index, sm, max_workers=max_workers, row_del_class=rel_row_del_class).parse_export(before, after)
 
     def do_export(self, file_path_or_stream):
-        if isinstance(file_path_or_stream, str) and file_path_or_stream.find('.xls') < 0:
-            file_path_or_stream += '.xls'
-        self.workbook.save(file_path_or_stream)  # file_path可能会是stream
+        self.excel.save(file_path_or_stream)  # file_path可能会是stream

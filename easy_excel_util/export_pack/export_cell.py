@@ -5,8 +5,6 @@ import datetime
 import time
 from inspect import isfunction
 
-from ..utils import DEFAULT_STYLE, DEFAULT_TITLE_STYLE
-
 
 class ExportCell(object):
 
@@ -22,8 +20,12 @@ class ExportCell(object):
         self.export_field = export_field
 
     @property
-    def sheet(self):
-        return self.export_row.export_sheet.work_sheet
+    def excel(self):
+        return self.export_row.excel
+
+    @property
+    def sheet_name(self):
+        return self.export_row.sheet_name
 
     def get_converter(self, cell_data):
         '''
@@ -62,21 +64,13 @@ class ExportCell(object):
                 return time.strftime("%Y-%m-%d %H:%M:%S", value)
         return value.strftime(self.export_field.datetime_format)
 
-    def get_title_style(self):
-        '''
-        获取表格抬头样式
-        :return:
-        '''
-        return self.export_row.export_sheet.sheet_map.title_style or DEFAULT_TITLE_STYLE
-
     def write_title_cell(self):
         '''
         写入title单元格数据
         :return:
         '''
-        col_width = self.export_row.export_sheet.sheet_map.col_width or 250
-        self.sheet.write(self.export_row.row_num, self.export_field.index, str(self.cell_data or ''), self.get_title_style())
-        self.sheet.col(self.export_field.index).width = 20 * col_width  # 20为基准数, 设置列宽, 默认250
+        self.excel.write(self.sheet_name, self.export_row.row_num, self.export_field.index, str(self.cell_data or ''),
+                         self.export_row.export_sheet.sheet_map.title_style, is_title=True)
 
     def get_style(self, value):
         '''
@@ -89,7 +83,7 @@ class ExportCell(object):
                 return self.export_field.style(self.export_row.row_num, self.cell_data, value)  # 根据row_num、cell_data、转换值计算style
             else:
                 return self.export_field.style
-        return DEFAULT_STYLE
+        return None
 
     def write_cell(self):
         '''
@@ -101,5 +95,5 @@ class ExportCell(object):
         if type(value) == datetime.datetime or type(value) == time.struct_time:
             value = self.format_str_to_datetime(value)  # 然后格式化
         style = self.get_style(value)
-        self.sheet.write(self.export_row.row_num, self.export_field.index, str(value), style)
+        self.excel.write(self.sheet_name, self.export_row.row_num, self.export_field.index, str(value), style, is_title=False)
         return dict(value=str(value), style=style)

@@ -3,18 +3,20 @@
 # Author: ChaoqiYin
 from .export_workbook import ExportWorkBook
 from .sheet_map import SheetMap
+from .export_workbook import BASE_ROW_HEIGHT, BASE_COL_WIDTH
 
 
 class Middleware(object):
     '''
     导出的中间件，用于构造build.sheet.sheet...do_export的结构
     '''
-    def __init__(self, converters, style=None, title_style=None):
+    def __init__(self, converters, style=None, title_style=None, xlsx=False):
         self.__converters = converters  # 转换类
         self.__style = style  # 单元格样式
         self.__title_style = title_style  # 单元格头样式
+        self.is_xlsx = xlsx
 
-    def sheet(self, index, data, parse_map, sheet_name=None, row_height=40, col_width=250, before=None, after=None,
+    def sheet(self, index, data, parse_map, sheet_name=None, row_height=BASE_ROW_HEIGHT, col_width=BASE_COL_WIDTH, before=None, after=None,
               style=None, title_style=None, row_del_class=None, max_workers=None):
         '''
         设置sheet对应map
@@ -37,4 +39,4 @@ class Middleware(object):
         rel_title_style = title_style or self.__title_style
         # 全局样式可能为None
         sheet_map = dict(index=SheetMap(rel_sheet_name, parse_map, data, row_height, col_width, rel_style, rel_title_style, row_del_class))
-        return ExportWorkBook(self.__converters, sheet_map, before, after, self.__style, self.__title_style, max_workers)
+        return ExportWorkBook(self.__converters, sheet_map, before, after, self.__style, self.__title_style, max_workers, self.is_xlsx)

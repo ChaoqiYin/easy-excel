@@ -64,8 +64,8 @@ class Builder(object):
         return ImportWorkbook(file, cls.import_converters.copy())
 
     @classmethod
-    def build_export(cls):
+    def build_export(cls, xlsx=False):
         '''
         :return:
         '''
-        return Middleware(cls.export_converters.copy(), cls._export_style, cls._export_title_style)
+        return Middleware(cls.export_converters.copy(), cls._export_style, cls._export_title_style, xlsx)

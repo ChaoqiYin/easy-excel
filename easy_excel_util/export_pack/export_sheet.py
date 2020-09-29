@@ -6,24 +6,32 @@ from concurrent.futures import ThreadPoolExecutor, wait
 
 class ExportSheet(object):
 
-    def __init__(self, excel_workbook, workbook, sheet_no, sheet_map, max_workers, row_del_class):
+    def __init__(self, excel_workbook, excel, sheet_no, sheet_map, max_workers, row_del_class):
         '''
         init
         :param excel_workbook: BaseWorkbook子类实例
-        :param workbook: workbook待写入文件
+        :param excel: factory的excel类实例
         :param sheet_no: 表格索引
         :param sheet_map: sheet_map实例
         :param max_workers: max_workers
         :param row_del_class: 解析处理row的类
         '''
         self.excel_workbook = excel_workbook
-        self.workbook = workbook
-        self.work_sheet = workbook.add_sheet(sheet_map.sheet_name, cell_overwrite_ok=True)
+        self.excel = excel
+        excel.add_sheet(sheet_map.sheet_name)
         self.sheet_no = sheet_no
         self.sheet_map = sheet_map
         self.max_workers = max_workers
         self.row_del_class = row_del_class
         self.col_data_map = {}  # {1: {1: [xx, style], 2: [yy, style]}}...
+
+    @property
+    def work_sheet(self):
+        return self.excel.get_sheet(self.sheet_map.sheet_name)
+
+    @property
+    def sheet_name(self):
+        return self.sheet_map.sheet_name
 
     @property
     def parse_map(self):
@@ -68,7 +76,8 @@ class ExportSheet(object):
 
                 if merge_dict['start_row'] != merge_dict['end_row']:
                     # 到达合并触发条件
-                    self.work_sheet.merge(
+                    self.excel.merge(
+                        self.sheet_name,
                         merge_dict['start_row'], merge_dict['end_row'], merge_dict['start_col'], merge_dict['end_col'],
                         row[merge_dict['start_row']][1]
                     )
@@ -127,6 +136,8 @@ class ExportSheet(object):
 
     def parse_export(self, before, after):
         start_row_num = 0
+        # 首先设置列宽
+        self.row_del_class.set_col_width(self.excel, self.sheet_name, self.parse_map, self.sheet_map.col_width)
         # 有before则先执行before
         if before is not None:
             start_row_num = before(self.work_sheet, self.sheet_no, self.sheet_map, self.row_del_class)

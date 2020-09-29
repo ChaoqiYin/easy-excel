@@ -17,8 +17,12 @@ class ExportRow(object):
         self.row_data = row_data
 
     @property
-    def sheet(self):
-        return self.export_sheet.work_sheet
+    def excel(self):
+        return self.export_sheet.excel
+
+    @property
+    def sheet_name(self):
+        return self.export_sheet.sheet_name
 
     @property
     def parse_map(self):
@@ -34,9 +38,14 @@ class ExportRow(object):
         :param row_num:
         :return:
         '''
-        row_height_base = self.export_sheet.sheet_map.row_height or 40
-        self.sheet.row(self.row_num).height_mismatch = True
-        self.sheet.row(self.row_num).height = 20 * row_height_base  # 20为基准数，默认40高
+        row_height = self.export_sheet.sheet_map.row_height or 40  # 默认40高
+        self.excel.set_row_height(self.sheet_name, self.row_num, row_height)
+
+    @staticmethod
+    def set_col_width(excel, sheet_name, parse_map, col_width):
+        col_width = col_width or 250  # 设置列宽, 默认250
+        for export_field_name, export_field in parse_map.items():
+            excel.set_col_width(sheet_name, export_field.index, col_width)
 
     def write_title(self):
         '''
