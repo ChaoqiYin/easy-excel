@@ -39,4 +39,4 @@ class Middleware(object):
         rel_title_style = title_style or self.__title_style
         # 全局样式可能为None
         sheet_map = dict(index=SheetMap(rel_sheet_name, parse_map, data, row_height, col_width, rel_style, rel_title_style, row_del_class))
-        return ExportWorkBook(self.__converters, sheet_map, before, after, self.__style, self.__title_style, max_workers, self.is_xlsx)
+        return ExportWorkBook(self.__converters, sheet_map, before, after, rel_style, rel_title_style, max_workers, self.is_xlsx)
