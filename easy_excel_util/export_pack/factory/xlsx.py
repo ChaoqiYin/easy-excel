@@ -11,13 +11,13 @@ BORDER_SIDE = Side(border_style='thin')
 
 DEFAULT_STYLE = {
     'font': Font(name='Arial', size=10),
-    'alignment': Alignment(horizontal='center', vertical='center'),
+    'alignment': Alignment(horizontal='center', vertical='center', wrapText=True),  # 自动换行
     'border': Border(left=BORDER_SIDE, right=BORDER_SIDE, top=BORDER_SIDE, bottom=BORDER_SIDE)
 }
 
 DEFAULT_TITLE_STYLE = {
     'font': Font(name='Arial', size=14, bold=True),
-    'alignment': Alignment(horizontal='center', vertical='center'),
+    'alignment': Alignment(horizontal='center', vertical='center', wrapText=True),  # 自动换行
     'border': Border(left=BORDER_SIDE, right=BORDER_SIDE, top=BORDER_SIDE, bottom=BORDER_SIDE)
 }
 
@@ -34,6 +34,7 @@ class Xlsx(Base):
         if isinstance(file_path_or_stream, str) and file_path_or_stream.find('.xlsx') < 0:
             file_path_or_stream += '.xlsx'
         self.wb.save(file_path_or_stream)
+        self.wb.close()
 
     def get_sheet(self, sheet_name):
         return self._sheet_map.get(sheet_name)
