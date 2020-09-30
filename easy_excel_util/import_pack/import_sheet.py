@@ -10,7 +10,7 @@ from ..utils import sort_dict_data, sort_dict_list_data
 class ImportSheet(object):
     def __init__(self, excel_workbook, excel, parse_map, error_message_prefix, sheet_no, start_row_num, end_row_num,
                  max_workers,
-                 row_del_class, row_validate_func, validate_title_row):
+                 row_del_class, row_validate_func, title_row):
         '''
         init
         :param excel_workbook: excel_workbook实例
@@ -23,7 +23,7 @@ class ImportSheet(object):
         :param max_workers: 异步最大线程数，为None时使用同步模式
         :param row_del_class: 解析处理row的类，默认是ImportRow
         :param row_validate_func: 行验证方法
-        :param validate_title_row: 不为None时，对标题进行验证的row索引，会对此索引的行进行field的col_name验证，如果不匹配，则会直接返回
+        :param title_row: 不为None时，对标题进行验证的row索引，会对此索引的行进行field的col_name验证，如果不匹配，则会直接返回
         '''
         self.excel_workbook = excel_workbook
         self.excel = excel
@@ -36,24 +36,25 @@ class ImportSheet(object):
         self.max_workers = max_workers
         self.row_del_class = row_del_class
         self.row_validate_func = row_validate_func  # 自定义的行处理方法，未自定义时为None
-        self.validate_title_row = validate_title_row
+        self.title_row = title_row
         self.reader_data_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
         self.error_message_map = {}  # 使用map是为了存入行index，可以采用异步线程存入
         self.merge_cell_value_map = {}  # 存储合并单元格数据的map
 
-    def validate_title(self):
+    def validate_title_index(self):
         '''
-        获取首行的列名和列index的map映射关系
+        获取指定行的列名和列index的map映射关系
         :return:
         '''
-        if self.validate_title_row is not None:
-            title_map = {}
-            for col_num in range(0, self.total_col_num + 1):
-                title_map[col_num] = str(self.excel.cell(self.validate_title_row, col_num).value)
+        if self.title_row is not None:
+            title_map = {}  # 存储title的名称和index映射关系
+            for col_num in range(0, self.total_col_num):
+                title_map[str(self.excel.cell(self.title_row, col_num).value)] = col_num
+
             for export_field_name, export_field in self.parse_map.items():
-                if export_field.col_name is not None and export_field.col_name != title_map[export_field.index]:
-                    return 'title row not validate by field\'s col_name'
-        return None
+                # col_name存在的情况，将export_field的index重置为正确的index
+                if export_field.col_name is not None and title_map.get(export_field.col_name, None) is not None:
+                    setattr(export_field, 'index', title_map.get(export_field.col_name))
 
     def del_merged_cells(self):
         '''
@@ -124,13 +125,8 @@ class ImportSheet(object):
         :return:
         '''
         self.del_merged_cells()
-        # 验证title
-        validate_title_result = self.validate_title()
-        if validate_title_result is not None:
-            return Result(
-                result=[],
-                error_message_list=[validate_title_result]
-            )
+        # 匹配title和index
+        self.validate_title_index()
         if self.max_workers is None:
             self.sync_parse()
         else:

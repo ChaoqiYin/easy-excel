@@ -57,7 +57,7 @@ class ImportWorkbook(object):
         return self
 
     def do_import(self, parse_map, error_message_prefix='第{row_num}行', sheet_no=0, start_row_num=0, end_row_num=None,
-                  row_del_class=None, row_validate_func=None, max_workers=None, validate_title_row=None):
+                  row_del_class=None, row_validate_func=None, max_workers=None, title_row=None):
         '''
         导入启动方法
         :param parse_map: 解析的字典
@@ -68,11 +68,11 @@ class ImportWorkbook(object):
         :param row_del_class: 默认的行处理类, 需要是ImportRow的子类
         :param row_validate_func: 行验证方法，接收4个参数：（行索引，行原始数据，行转换后的数据，parse_map），返回None或一个list，里面是该行的错误消息，会自动拼接上error_message_prefix
         :param max_workers: 异步线程数
-        :param validate_title_row: 对标题进行验证的row索引，会对此索引的行进行field的col_name验证，如果不匹配，则会直接返回
+        :param title_row: 对标题进行验证的row索引，会对此索引的行进行field的col_name验证，如果不匹配，则会直接返回
         :return:
         '''
         rel_row_del_class = ImportRow if row_del_class is None else row_del_class
         excel = turn_file_to_excel_workbook(self.file, sheet_no)
         sheet = ImportSheet(self, excel, parse_map, error_message_prefix, sheet_no,
-                            start_row_num, end_row_num, max_workers, rel_row_del_class, row_validate_func, validate_title_row)
+                            start_row_num, end_row_num, max_workers, rel_row_del_class, row_validate_func, title_row)
         return sheet.get_value()
