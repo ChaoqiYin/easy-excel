@@ -53,7 +53,7 @@ class ExportCell(object):
 
     def format_str_to_datetime(self, value):
         '''
-        根据字段format转换str为datetime
+        根据字段format转换为str
         :param value: datetime或者time
         :return:
         '''

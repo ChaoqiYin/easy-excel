@@ -38,7 +38,7 @@ class ExportWorkBook(object):
         :param max_workers: 异步线程数
         :return:
         '''
-        rel_sheet_name = 'sheet_' + str(index + 1) if sheet_name is None else sheet_name
+        rel_sheet_name = 'sheet' + str(index + 1) if sheet_name is None else sheet_name
         rel_style = style or self.style
         rel_title_style = title_style or self.title_style
         # 全局样式可能为None

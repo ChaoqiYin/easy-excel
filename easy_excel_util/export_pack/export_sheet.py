@@ -93,7 +93,7 @@ class ExportSheet(object):
         for row_data in self.sheet_map.list_data:
             row_num += 1
             self.add_row(row_num, row_data)
-        return row_num
+        return row_num + 1
 
     def thread_parse(self, start_row_num):
         '''
@@ -113,7 +113,7 @@ class ExportSheet(object):
                 work_list.append(future)
             # 等待完成
             wait(work_list)
-        return row_num
+        return row_num + 1
 
     def add_title(self, row_num):
         '''
