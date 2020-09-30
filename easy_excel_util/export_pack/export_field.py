@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 # Author: ChaoqiYin
 from ..base_field import BaseField
+from .export_workbook import BASE_COL_WIDTH
 
 
 class ExportField(BaseField):
-    def __init__(self, index, datetime_format=None, col_name=None, converter=None, style=None, merge_same=False):
+    def __init__(self, index, datetime_format=None, col_name=None, width=BASE_COL_WIDTH, converter=None, style=None, merge_same=False):
         '''
         init
         :param index:
@@ -18,3 +19,4 @@ class ExportField(BaseField):
         super().__init__(index, datetime_format, col_name, converter)
         self.style = style
         self.merge_same = merge_same
+        self.width = width

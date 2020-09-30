@@ -16,7 +16,7 @@ class Middleware(object):
         self.__title_style = title_style  # 单元格头样式
         self.is_xlsx = xlsx
 
-    def sheet(self, index, data, parse_map, sheet_name=None, row_height=BASE_ROW_HEIGHT, col_width=BASE_COL_WIDTH, before=None, after=None,
+    def sheet(self, index, data, parse_map, sheet_name=None, height=BASE_ROW_HEIGHT, before=None, after=None,
               style=None, title_style=None, row_del_class=None, max_workers=None):
         '''
         设置sheet对应map
@@ -24,8 +24,7 @@ class Middleware(object):
         :param parse_map: 解析map
         :param data: 导出的数据, 用list装载
         :param sheet_name: 表名
-        :param row_height: 默认行高
-        :param col_width: 默认列宽
+        :param height: 默认行高
         :param before: 导入第一行前的操作
         :param after: 导入最后一行后的操作
         :param style: 该sheet单元格样式，不传则使用全局样式, 可以是fun
@@ -38,5 +37,5 @@ class Middleware(object):
         rel_style = style or self.__style
         rel_title_style = title_style or self.__title_style
         # 全局样式可能为None
-        sheet_map = dict(index=SheetMap(rel_sheet_name, parse_map, data, row_height, col_width, rel_style, rel_title_style, row_del_class))
+        sheet_map = dict(index=SheetMap(rel_sheet_name, parse_map, data, height, rel_style, rel_title_style, row_del_class))
         return ExportWorkBook(self.__converters, sheet_map, before, after, rel_style, rel_title_style, max_workers, self.is_xlsx)

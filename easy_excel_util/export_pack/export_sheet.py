@@ -137,7 +137,7 @@ class ExportSheet(object):
     def parse_export(self, before, after):
         start_row_num = 0
         # 首先设置列宽
-        self.row_del_class.set_col_width(self.excel, self.sheet_name, self.parse_map, self.sheet_map.col_width)
+        self.row_del_class.set_col_width(self.excel, self.sheet_name, self.parse_map)
         # 有before则先执行before
         if before is not None:
             start_row_num = before(self.work_sheet, self.sheet_no, self.sheet_map, self.row_del_class)

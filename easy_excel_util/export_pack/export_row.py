@@ -42,10 +42,10 @@ class ExportRow(object):
         self.excel.set_row_height(self.sheet_name, self.row_num, row_height)
 
     @staticmethod
-    def set_col_width(excel, sheet_name, parse_map, col_width):
-        col_width = col_width or 250  # 设置列宽, 默认250
+    def set_col_width(excel, sheet_name, parse_map):
+        # 设置列宽, 默认20
         for export_field_name, export_field in parse_map.items():
-            excel.set_col_width(sheet_name, export_field.index, col_width)
+            excel.set_col_width(sheet_name, export_field.index, export_field.width)
 
     def write_title(self):
         '''
