@@ -4,7 +4,7 @@
 **excel操作简化，包含导入和导出功能。省去平时频繁的重复操作，同时支持xls和xlsx**  
 
 安装方式：  
-需要python3以上
+需要python3.6以上
 1. 下载文件内的easy_excel_util包使用
 2. pip install easy-excel-util
 
