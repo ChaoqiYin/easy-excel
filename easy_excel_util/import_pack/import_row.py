@@ -43,7 +43,7 @@ class ImportRow(object):
         if (index + 1) <= self.total_col_num:
             value = ImportCell(self, index, build_field).get_value()
         else:
-            value = None
+            value = {'success': False, 'result': None, 'message': 'out of index'}
         return value
 
     def get_value(self):

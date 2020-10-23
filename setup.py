@@ -15,7 +15,7 @@ URL = 'https://github.com/ChaoqiYin/easy-excel.git'
 EMAIL = '305111632@qq.com'
 AUTHOR = 'ChaoqiYin'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '2.0.1'
+VERSION = '2.0.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
