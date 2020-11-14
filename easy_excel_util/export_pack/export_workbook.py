@@ -17,9 +17,10 @@ class ExportWorkBook(object):
         self.style = style  # 单元格样式
         self.title_style = title_style  # 单元格头样式
         self.is_xlsx = xlsx
+        self.__sheet_data = {}  # key是sheet的index
         # 根据是否是xlsx生成不同的workbook
         self.excel = type_factory.get('xls' if xlsx is False else 'xlsx')()
-        self.__start_parse(sheet_map, before, after, max_workers)
+        self.__set_parse_info(sheet_map, before, after, max_workers)
 
     def sheet(self, index, data, parse_map, sheet_name=None, height=BASE_ROW_HEIGHT, before=None, after=None,
               style=None, title_style=None, row_del_class=None, max_workers=None):
@@ -42,15 +43,29 @@ class ExportWorkBook(object):
         rel_style = style or self.style
         rel_title_style = title_style or self.title_style
         # 全局样式可能为None
-        sheet_map = dict(index=SheetMap(rel_sheet_name, parse_map, data, height, rel_style, rel_title_style, row_del_class))
-        self.__start_parse(sheet_map, before, after, max_workers)
+        sheet_map = SheetMap(index, rel_sheet_name, parse_map, data, height, rel_style, rel_title_style, row_del_class)
+        self.__set_parse_info(sheet_map, before, after, max_workers)
         return self
 
-    def __start_parse(self, sheet_map, before, after, max_workers):
+    def __set_parse_info(self, sheet_map, before, after, max_workers):
+        rel_row_del_class = sheet_map.row_del_class or ExportRow
         # 升序排序
-        for index, sm in sheet_map.items():
-            rel_row_del_class = sm.row_del_class or ExportRow
-            ExportSheet(self, self.excel, index, sm, max_workers=max_workers, row_del_class=rel_row_del_class).parse_export(before, after)
+        self.__sheet_data[sheet_map.index] = ExportSheet(
+            self, self.excel, sheet_map.index, sheet_map,
+            max_workers=max_workers, row_del_class=rel_row_del_class,
+            before=before, after=after
+        )
 
     def do_export(self, file_path_or_stream):
+        if len(self.__sheet_data) == 0:
+            raise Exception('no sheet info!')
+        keys = list(self.__sheet_data.keys())
+        keys.sort()
+        for i in range(0, keys[-1] + 1):
+            es = self.__sheet_data.get(i, None)
+            if es is None:
+                # 生成空白表
+                self.excel.add_sheet('sheet' + str(i + 1))
+            else:
+                es.parse_export()
         self.excel.save(file_path_or_stream)  # file_path可能会是stream

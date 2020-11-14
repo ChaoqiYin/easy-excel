@@ -5,3 +5,5 @@ dist
 test*
 *.xls
 *.xlsx
+__init__.py
+app.py

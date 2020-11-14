@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, wait
 
 class ExportSheet(object):
 
-    def __init__(self, excel_workbook, excel, sheet_no, sheet_map, max_workers, row_del_class):
+    def __init__(self, excel_workbook, excel, sheet_no, sheet_map, max_workers, row_del_class, before, after):
         '''
         init
         :param excel_workbook: BaseWorkbook子类实例
@@ -15,15 +15,18 @@ class ExportSheet(object):
         :param sheet_map: sheet_map实例
         :param max_workers: max_workers
         :param row_del_class: 解析处理row的类
+        :param before: 解析前的处理
+        :param after: 解析后的处理
         '''
         self.excel_workbook = excel_workbook
         self.excel = excel
-        excel.add_sheet(sheet_map.sheet_name)
         self.sheet_no = sheet_no
         self.sheet_map = sheet_map
         self.max_workers = max_workers
         self.row_del_class = row_del_class
         self.col_data_map = {}  # {1: {1: [xx, style], 2: [yy, style]}}...
+        self.before = before
+        self.after = after
 
     @property
     def work_sheet(self):
@@ -134,7 +137,10 @@ class ExportSheet(object):
     def add_row(self, row_num, row_data):
         self.row_del_class(self, row_num, row_data).write_row()
 
-    def parse_export(self, before, after):
+    def parse_export(self):
+        before = self.before
+        after = self.after
+        self.excel.add_sheet(self.sheet_map.sheet_name)
         start_row_num = 0
         # 首先设置列宽
         self.row_del_class.set_col_width(self.excel, self.sheet_name, self.parse_map)

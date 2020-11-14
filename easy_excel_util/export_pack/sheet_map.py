@@ -4,7 +4,8 @@
 
 
 class SheetMap(object):
-    def __init__(self, sheet_name, parse_map, data, height, style, title_style, row_del_class):
+    def __init__(self, index, sheet_name, parse_map, data, height, style, title_style, row_del_class):
+        self.index = index
         self.sheet_name = sheet_name  # 表名
         self.parse_map = parse_map  # parse_map
         self.list_data = data  # 待解析数据
