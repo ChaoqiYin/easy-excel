@@ -5,8 +5,8 @@ type_factory = {}
 
 
 class Base(object):
-    def __init__(self, workbook, sheet_no):
-        self.wb = workbook
+    def __init__(self, sheet, sheet_no):
+        self.sheet = sheet
         self.sheet_no = sheet_no
 
     @property

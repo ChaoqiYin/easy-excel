@@ -46,6 +46,16 @@ class ImportRow(object):
             value = {'success': False, 'result': None, 'message': 'out of index'}
         return value
 
+    def set_reader_data(self, reader_data_instance, field_name, field_value):
+        '''
+        设置导出后的字体类值
+        @param reader_data_instance: reader_data实例
+        @param field_name: 字段名
+        @param field_value: 字段值
+        @return:
+        '''
+        setattr(reader_data_instance, field_name, field_value)
+
     def get_value(self):
         '''
         获取解析后的对象, 反序列化行数据
@@ -60,7 +70,7 @@ class ImportRow(object):
         for field_name, build_field in self.parse_map.items():
             build_field.name = field_name
             result_map = self.matching_index_value(build_field)
-            setattr(reader_data, field_name, result_map.get('result'))
+            self.set_reader_data(reader_data, field_name, result_map.get('result'))
             # 根据校验是否成功添加错误信息
             if result_map.get('success') is False:
                 deserialize_success = False

@@ -5,9 +5,8 @@ from .base import Base, Cell, type_factory
 
 
 class Xlsx(Base):
-    def __init__(self, workbook, sheet_no):
-        super().__init__(workbook, sheet_no)
-        self.sheet = workbook.worksheets[sheet_no]
+    def __init__(self, sheet, sheet_no):
+        super().__init__(sheet, sheet_no)
 
     @property
     def merged_cells(self):

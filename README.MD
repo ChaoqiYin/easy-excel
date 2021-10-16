@@ -3,8 +3,16 @@
 
 **excel操作简化，包含导入和导出功能。省去平时频繁的重复操作，同时支持xls和xlsx**  
 
+需要条件
+
+- xlrd>=1.2
+
+- xlwt>=1.3
+
+- openpyxl>=3.0.5
+
 安装方式：  
-需要python3.6以上
+需要python3.6及以上
 
 1. 下载文件内的easy_excel_util包使用
 2. pip install easy-excel-util
@@ -129,7 +137,7 @@
         ```python
         data1 = [{'id': 1, 'name': '姓名1', 'age': 18}, {'id': 2, 'name': '姓名2', 'age': 20}]
         data2 = [{'id': 11, 'name': '姓名11', 'age': 18}, {'id': 12, 'name': '姓名12', 'age': 20}]
-    
+        
         Builder.build_export().sheet(
             index=0, data=data1, parse_map=dict(
                 id=ExportField(index=0, col_name='id', width=5), 
